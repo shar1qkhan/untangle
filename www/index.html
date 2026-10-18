@@ -1,0 +1,2419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+<meta name="theme-color" content="#FAF3E8" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<title>Untangle</title>
+<link rel="manifest" id="manifestLink" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: { extend: { colors: {
+      cream: { 50:'#FEFBF5', 100:'#FAF3E8', 200:'#F3E4CB', 300:'#E8CFA8', 400:'#D9B07A' },
+      ink:   { 700:'#5A3B1F', 800:'#3E2712', 900:'#2E1F12' },
+      terra: { 400:'#E27D3C', 500:'#C8571C', 600:'#A84513' },
+      teal:  { 500:'#14B8A6', 600:'#0F766E', 700:'#0B5D57', 800:'#083F3A' },
+      coral: { 400:'#FB7185', 500:'#F43F5E', 600:'#DC2626' },
+      gold:  { 400:'#FBBF24', 500:'#F59E0B', 600:'#D97706' }
+    }}}
+  };
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+  * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+  html, body { -webkit-text-size-adjust: 100%; overscroll-behavior: none; }
+  body { margin: 0; font-family: 'Nunito', ui-sans-serif, system-ui, sans-serif;
+    background: #1A1108; color: #2E1F12; -webkit-user-select: none; user-select: none; }
+  .font-display { font-family: 'Baloo 2', ui-rounded, system-ui, sans-serif; }
+  .no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+
+  /* ---------- Phone shell ---------- */
+  .phone {
+    position: relative; margin: 0 auto; width: 100%; max-width: 430px; height: 100dvh;
+    display: flex; flex-direction: column; overflow: hidden;
+    background:
+      radial-gradient(140% 60% at 50% -10%, rgba(255,255,255,.9) 0%, transparent 50%),
+      radial-gradient(120% 50% at 50% 0%,
+        var(--bg-top, #FFFFFF) 0%,
+        var(--bg-mid, #FAF3E8) 45%,
+        var(--bg-bot, #F3E4CB) 100%);
+    transition: background .8s ease;
+  }
+  @media (min-width: 480px) and (min-height: 640px) {
+    body { display: flex; align-items: center; justify-content: center;
+      background: radial-gradient(circle at 50% -10%, #4A3018 0%, #241609 55%, #140B04 100%); }
+    .phone { height: min(94dvh, 940px); width: auto; max-width: none; aspect-ratio: 9 / 19.5;
+      border-radius: 40px; box-shadow:
+        0 0 0 10px #150D05,
+        0 0 0 12px #3A2A18,
+        0 50px 100px -30px rgba(0,0,0,.9),
+        inset 0 0 60px rgba(0,0,0,.05); }
+  }
+
+  /* ---------- Buttons ---------- */
+  .btn-primary {
+    background: linear-gradient(180deg, #F59E0B 0%, #EA580C 55%, #C2410C 100%);
+    color: #fff;
+    box-shadow:
+      0 4px 0 0 #9A3412,
+      0 8px 20px -8px rgba(194,65,12,.55),
+      inset 0 1px 0 rgba(255,255,255,.3);
+    text-shadow: 0 1px 1px rgba(0,0,0,.15);
+    transition: transform .1s, box-shadow .1s;
+  }
+  .btn-primary:active:not(:disabled) {
+    transform: translateY(3px);
+    box-shadow:
+      0 1px 0 0 #9A3412,
+      0 4px 10px -4px rgba(194,65,12,.5),
+      inset 0 1px 0 rgba(255,255,255,.2);
+  }
+  .btn-primary:disabled {
+    filter: grayscale(.55) brightness(1.05); opacity: .55;
+    box-shadow: 0 4px 0 0 #A08A72;
+  }
+
+  .btn-ghost {
+    background: linear-gradient(180deg, rgba(255,255,255,.9), rgba(255,255,255,.7));
+    border: 1.5px solid #E8CFA8; color: #5A3B1F;
+    box-shadow: 0 2px 4px rgba(94,56,20,.06);
+    transition: transform .1s, background .1s;
+  }
+  .btn-ghost:active:not(:disabled) { transform: scale(.97); background: #fff; }
+  .btn-ghost:disabled { opacity: .5; }
+
+  .btn-gold {
+    background: linear-gradient(180deg, #FBBF24 0%, #F59E0B 55%, #D97706 100%); color: #4A2010;
+    box-shadow: 0 3px 0 0 #92400E, 0 8px 16px -6px rgba(146,64,14,.5), inset 0 1px 0 rgba(255,255,255,.4);
+    transition: transform .1s, box-shadow .1s;
+  }
+  .btn-gold:active:not(:disabled) {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 0 #92400E, inset 0 1px 0 rgba(255,255,255,.3);
+  }
+  .btn-gold:disabled { opacity: .5; filter: grayscale(.4); }
+
+  .btn-icon {
+    height: 38px; width: 38px; display: grid; place-items: center;
+    border-radius: 12px;
+    background: linear-gradient(180deg, #fff, #FEFAF3);
+    border: 1.5px solid #E8CFA8;
+    color: #5A3B1F; font-size: 17px;
+    box-shadow: 0 2px 4px rgba(94,56,20,.06), inset 0 1px 0 rgba(255,255,255,.9);
+    transition: transform .1s, background .1s;
+  }
+  .btn-icon:active { transform: scale(.93); background: #fff; }
+
+  /* ---------- Cards ---------- */
+  .card {
+    background: linear-gradient(160deg, #FFFFFF 0%, #FEFAF3 100%);
+    border: 1.5px solid #F3E4CB;
+    border-radius: 22px;
+    box-shadow: 0 6px 20px -8px rgba(94,56,20,.15), 0 2px 4px -2px rgba(94,56,20,.06), inset 0 1px 0 rgba(255,255,255,.9);
+  }
+  .card-amber {
+    background: linear-gradient(150deg, #FEF8EC 0%, #FEF3D6 45%, #FFF5E0 100%);
+    border: 1.5px solid #F0DCB4;
+    border-radius: 22px;
+    box-shadow: 0 8px 24px -10px rgba(217,119,6,.25), 0 2px 4px -2px rgba(94,56,20,.05), inset 0 1px 0 rgba(255,255,255,.9);
+  }
+  .card-hero {
+    background:
+      radial-gradient(120% 80% at 100% 0%, rgba(245,158,11,.12) 0%, transparent 60%),
+      linear-gradient(160deg, #FFFFFF 0%, #FEF8EC 100%);
+    border: 1.5px solid #E8CFA8;
+    border-radius: 24px;
+    box-shadow: 0 10px 30px -10px rgba(200,87,28,.18), 0 2px 4px -2px rgba(94,56,20,.06), inset 0 1px 0 rgba(255,255,255,.9);
+  }
+
+  .section-title {
+    font-size: 10px; font-weight: 900; text-transform: uppercase;
+    letter-spacing: 0.16em; color: #A84513;
+  }
+
+  /* ---------- Level hero number ---------- */
+  .level-hero {
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 46px; font-weight: 800; line-height: 1;
+    background: linear-gradient(180deg, #EA580C 0%, #C2410C 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; color: transparent;
+    filter: drop-shadow(0 2px 3px rgba(194,65,12,.15));
+    letter-spacing: -0.03em;
+  }
+
+  /* ---------- Header ---------- */
+  .hdr-pill {
+    display: flex; align-items: center; gap: 4px;
+    background: rgba(255,255,255,.85);
+    border: 1px solid #F3E4CB;
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: 12px; font-weight: 800; color: #3E2712;
+    box-shadow: 0 1px 2px rgba(94,56,20,.04), inset 0 1px 0 rgba(255,255,255,.9);
+  }
+
+  /* ---------- Board ---------- */
+  #board { width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
+  #board:active { cursor: grabbing; }
+
+  #boardWrap {
+    background:
+      radial-gradient(100% 100% at 50% 0%, #FEFAF3 0%, #FAF3E8 100%);
+    border: 2px solid #E8CFA8;
+    border-radius: 24px;
+    box-shadow: inset 0 2px 6px rgba(94,56,20,.08), 0 6px 16px -6px rgba(94,56,20,.15);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .crossing-dot { animation: pulseDot 1.1s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+  @keyframes pulseDot { 0%, 100% { opacity: .9; transform: scale(1); } 50% { opacity: .55; transform: scale(1.25); } }
+  .edge-crossing { animation: pulseEdge 1.4s ease-in-out infinite; }
+  @keyframes pulseEdge { 0%, 100% { stroke-opacity: 1; } 50% { stroke-opacity: .65; } }
+  .hint-ring { transform-box: fill-box; transform-origin: center; animation: hintPulse 1.2s ease-out infinite; pointer-events: none; }
+  @keyframes hintPulse { 0% { transform: scale(1); opacity: .85; } 100% { transform: scale(2.4); opacity: 0; } }
+
+  /* ---------- Level tiles ---------- */
+  .level-tile {
+    flex: 0 0 auto; width: 50px; height: 50px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    border-radius: 14px; border: 1.5px solid #E8CFA8;
+    background: linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,.7));
+    font-family: 'Baloo 2', sans-serif; font-weight: 800; color: #5A3B1F;
+    transition: transform .1s, background .1s;
+    position: relative;
+    box-shadow: 0 1px 3px rgba(94,56,20,.04);
+  }
+  .level-tile:active { transform: scale(.94); background: #FFF; }
+  .level-tile.solved {
+    background: linear-gradient(180deg, #FEF3C7 0%, #FDE68A 100%);
+    border-color: #F59E0B;
+    box-shadow: 0 2px 6px -2px rgba(245,158,11,.4);
+  }
+  .level-tile.current {
+    border-color: #EA580C; border-width: 2.5px;
+    box-shadow: 0 0 0 3px rgba(234,88,12,.15), 0 2px 6px -2px rgba(234,88,12,.3);
+  }
+  .level-tile .stars { font-size: 8px; letter-spacing: -1px; line-height: 1; margin-top: 1px; color: #D97706; }
+
+  /* ---------- Skins ---------- */
+  .skin-swatch {
+    flex: 0 0 auto; width: 44px; height: 44px; border-radius: 50%;
+    border: 2.5px solid #E8CFA8; background: #FEFBF5; padding: 3px;
+    position: relative; transition: transform .1s, border-color .1s;
+    box-shadow: 0 2px 4px rgba(94,56,20,.06);
+  }
+  .skin-swatch:active:not(:disabled) { transform: scale(.93); }
+  .skin-swatch.active {
+    border-color: #C2410C;
+    box-shadow: 0 0 0 3px rgba(194,65,12,.18), 0 2px 6px -2px rgba(194,65,12,.3);
+  }
+  .skin-swatch.locked { opacity: .35; cursor: not-allowed; filter: grayscale(.8); }
+  .skin-swatch .dot { width: 100%; height: 100%; border-radius: 50%; }
+  .skin-swatch .lock-badge {
+    position: absolute; bottom: -4px; right: -4px;
+    font-size: 9px; background: #fff; border: 1px solid #E8CFA8;
+    border-radius: 6px; padding: 1px 3px; font-weight: 800; color: #5A3B1F;
+  }
+
+  /* ---------- Mercy banner ---------- */
+  .mercy-banner {
+    background: linear-gradient(135deg, rgba(251,191,36,.22) 0%, rgba(245,158,11,.1) 100%);
+    border: 1.5px solid #F59E0B;
+    box-shadow: 0 4px 12px -4px rgba(245,158,11,.3);
+    animation: mercyPulse 2s ease-in-out infinite;
+  }
+  @keyframes mercyPulse {
+    0%, 100% { box-shadow: 0 4px 12px -4px rgba(245,158,11,.3), 0 0 0 0 rgba(245,158,11,.2); }
+    50% { box-shadow: 0 4px 12px -4px rgba(245,158,11,.3), 0 0 0 6px rgba(245,158,11,0); }
+  }
+
+  /* ---------- Overlays ---------- */
+  #completeOverlay, #achievementOverlay, #prestigeOverlay {
+    position: absolute; inset: 0; background: rgba(46, 31, 18, 0.55);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 22px; z-index: 20; animation: fadeIn .3s ease;
+  }
+  #completeOverlay.hidden, #achievementOverlay.hidden, #prestigeOverlay.hidden { display: none; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .complete-card {
+    background: linear-gradient(160deg, #FFFFFF 0%, #FEFAF3 100%);
+    border-radius: 28px; padding: 22px 20px 20px;
+    width: 100%; max-width: 340px; text-align: center;
+    box-shadow: 0 30px 60px -20px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.9);
+    animation: popIn .4s cubic-bezier(.22,1,.36,1);
+    position: relative; overflow: hidden;
+  }
+  @keyframes popIn { 0% { transform: scale(.85); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+  .star-big {
+    display: inline-block; font-size: 42px; line-height: 1; margin: 0 3px;
+    animation: starPop .5s cubic-bezier(.22,1,.36,1) both;
+    filter: drop-shadow(0 3px 4px rgba(217,119,6,.35));
+  }
+  .star-big.dim { opacity: .25; filter: grayscale(1); }
+  .star-big:nth-child(2) { animation-delay: .12s; }
+  .star-big:nth-child(3) { animation-delay: .24s; }
+  @keyframes starPop {
+    0% { transform: scale(0) rotate(-45deg); opacity: 0; }
+    60% { transform: scale(1.3) rotate(8deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0); }
+  }
+
+  .milestone-banner {
+    margin: -22px -20px 12px; padding: 10px;
+    background: linear-gradient(90deg, #F59E0B, #FBBF24, #F59E0B);
+    color: #7E3210; font-weight: 900; font-size: 11px;
+    letter-spacing: .08em; text-transform: uppercase;
+    animation: shimmer 2s linear infinite; background-size: 200% auto;
+  }
+  @keyframes shimmer { 0% { background-position: 0% center; } 100% { background-position: 200% center; } }
+
+  .chapter-banner {
+    margin: -22px -20px 12px; padding: 16px 12px;
+    background: linear-gradient(135deg, #7C3AED, #DB2777, #F59E0B, #7C3AED);
+    background-size: 300% 300%; color: #fff;
+    font-weight: 900; font-size: 12px;
+    letter-spacing: .1em; text-transform: uppercase;
+    text-shadow: 0 1px 3px rgba(0,0,0,.4);
+    animation: chapterShimmer 3s ease-in-out infinite;
+    line-height: 1.3;
+  }
+  .chapter-banner .cb-title { display: block; font-size: 9px; letter-spacing: .22em; opacity: .9; margin-bottom: 3px; }
+  .chapter-banner .cb-name { display: block; font-family: 'Baloo 2', sans-serif; font-size: 18px; letter-spacing: .02em; }
+  @keyframes chapterShimmer { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+
+  .confetti {
+    position: absolute; width: 9px; height: 9px; border-radius: 50%;
+    pointer-events: none; z-index: 30;
+    animation: confettiFly 1s cubic-bezier(0.15, 0.6, 0.4, 1) forwards;
+  }
+  @keyframes confettiFly {
+    0% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
+    100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(.3) rotate(360deg); opacity: 0; }
+  }
+
+  .combo-pop {
+    position: absolute; pointer-events: none;
+    font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 26px;
+    color: #F59E0B; text-shadow: 0 2px 0 #7E3210, 0 4px 12px rgba(0,0,0,.35);
+    animation: comboFloat 1s ease-out forwards; z-index: 15;
+  }
+  @keyframes comboFloat {
+    0% { transform: translate(-50%, -50%) scale(.5); opacity: 0; }
+    30% { transform: translate(-50%, -70%) scale(1.15); opacity: 1; }
+    100% { transform: translate(-50%, -120%) scale(1); opacity: 0; }
+  }
+
+  #tutorialOverlay {
+    position: absolute; inset: 0; pointer-events: none;
+    display: flex; align-items: center; justify-content: center; z-index: 12;
+  }
+  #tutorialOverlay.hidden { display: none; }
+  .tut-bubble {
+    background: rgba(46, 31, 18, 0.94);
+    border-radius: 20px; padding: 16px 20px;
+    text-align: center; max-width: 280px;
+    box-shadow: 0 12px 30px rgba(0,0,0,.35);
+    animation: tutBob 2s ease-in-out infinite;
+  }
+  @keyframes tutBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+  .tut-arrow { display: inline-block; animation: tutArrow 1.4s ease-in-out infinite; }
+  @keyframes tutArrow { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(8px, 8px); } }
+
+  /* ---------- Missions ---------- */
+  .mission-row { display: flex; align-items: center; gap: 10px; padding: 6px 0; }
+  .mission-check {
+    width: 20px; height: 20px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 900; flex-shrink: 0;
+    border: 2px solid #E8CFA8; background: #FEFBF5; color: #B99A6E;
+    transition: all .2s;
+  }
+  .mission-row.done .mission-check { background: linear-gradient(180deg, #34D399, #059669); border-color: #047857; color: #fff; }
+  .mission-row.done .mission-label { text-decoration: line-through; opacity: .5; }
+
+  /* ---------- Achievements ---------- */
+  .ach-row {
+    display: flex; align-items: center; gap: 10px; padding: 8px 0;
+    border-bottom: 1px solid rgba(232,207,168,.4);
+  }
+  .ach-row:last-child { border-bottom: none; }
+  .ach-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center; font-size: 18px;
+    background: linear-gradient(135deg, #FEF3C7, #FDE68A);
+    box-shadow: 0 2px 4px rgba(245,158,11,.15);
+    flex-shrink: 0;
+  }
+  .ach-row.locked .ach-icon { background: #F3E4CB; filter: grayscale(1); opacity: .5; box-shadow: none; }
+  .ach-row.locked .ach-name { opacity: .5; }
+  .ach-row.locked .ach-desc { opacity: .35; }
+
+  /* ---------- Prestige badge ---------- */
+  .prestige-badge {
+    display: inline-flex; align-items: center; gap: 2px;
+    font-size: 10px; font-weight: 900; padding: 2px 7px; border-radius: 999px;
+    background: linear-gradient(135deg, #7C3AED, #DB2777);
+    color: #fff; letter-spacing: .04em;
+    box-shadow: 0 2px 6px rgba(124,58,237,.4);
+  }
+
+  /* ---------- Chapter chip ---------- */
+  .chapter-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: .1em;
+    color: #5A3B1F; background: rgba(255,255,255,.8);
+    border: 1px solid #E8CFA8;
+    padding: 3px 8px; border-radius: 999px;
+    box-shadow: 0 1px 2px rgba(94,56,20,.04);
+  }
+
+  /* ---------- Mood line ---------- */
+  .mood-line {
+    font-size: 10px; font-weight: 800; font-style: italic;
+    color: rgba(90,59,31,.6);
+    padding: 3px 8px;
+    background: rgba(255,255,255,.5);
+    border-radius: 8px;
+    display: inline-block;
+    margin-top: 4px;
+  }
+
+  /* ---------- Toast ---------- */
+  #toast {
+    position: absolute; bottom: 96px; left: 50%;
+    transform: translate(-50%, 20px);
+    background: rgba(46, 31, 18, 0.96); color: #FAF3E8;
+    padding: 11px 18px; border-radius: 14px;
+    font-weight: 700; font-size: 13px;
+    max-width: 85%; text-align: center;
+    opacity: 0; transition: all .3s; pointer-events: none; z-index: 50;
+    box-shadow: 0 10px 30px rgba(0,0,0,.4);
+    backdrop-filter: blur(4px);
+  }
+  #toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  /* ---------- Install banner ---------- */
+  #installBanner {
+    position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%);
+    background: linear-gradient(135deg, #C2410C, #9A3412);
+    color: #fff; padding: 12px 18px;
+    border-radius: 16px;
+    box-shadow: 0 20px 40px -10px rgba(154,52,18,.6);
+    z-index: 100;
+    font-weight: 700; font-size: 13px;
+    display: flex; align-items: center; gap: 10px;
+    max-width: calc(100% - 40px);
+    animation: installIn .5s cubic-bezier(.22,1,.36,1);
+  }
+  #installBanner.hidden { display: none; }
+  #installBanner button {
+    background: #fff; color: #9A3412;
+    padding: 6px 12px; border-radius: 8px;
+    font-weight: 800; font-size: 12px; border: none; cursor: pointer;
+  }
+  @keyframes installIn {
+    0% { transform: translate(-50%, 30px); opacity: 0; }
+    100% { transform: translate(-50%, 0); opacity: 1; }
+  }
+
+  /* ---------- Boot error ---------- */
+  #bootError {
+    position: fixed; inset: 0; z-index: 9999; background: #fff;
+    color: #900; font-family: ui-monospace, monospace; font-size: 12px;
+    padding: 20px; overflow: auto; white-space: pre-wrap; display: none;
+  }
+
+  :focus-visible { outline: 3px solid #C2410C; outline-offset: 3px; border-radius: 12px; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  }
+</style>
+</head>
+<body>
+<div class="phone" id="phone">
+
+  <!-- HEADER -->
+  <header class="shrink-0 mx-3 mt-3 mb-1 px-3 py-2 rounded-2xl bg-white/85 border border-cream-200 shadow-sm backdrop-blur-md flex items-center justify-between">
+    <div class="flex items-center gap-1.5">
+      <span class="text-2xl leading-none" aria-hidden="true">🧵</span>
+      <h1 class="font-display text-lg font-extrabold tracking-tight text-ink-900">Untangle</h1>
+      <span id="prestigeBadge" class="prestige-badge hidden">👑 ×<span id="prestigeCount">1</span></span>
+    </div>
+    <div class="flex items-center gap-1.5">
+      <div class="hdr-pill">
+        <span aria-hidden="true">🔥</span><span id="hdrStreak">0</span>
+        <span class="w-px h-3 bg-cream-300"></span>
+        <span aria-hidden="true">🧵</span><span id="hdrThreads">0</span>
+      </div>
+      <button id="btnAch" class="btn-icon" aria-label="Achievements">🏆</button>
+      <button id="btnMute" class="btn-icon" aria-label="Toggle sound">🔊</button>
+    </div>
+  </header>
+
+  <main id="main" class="flex-1 overflow-y-auto no-scrollbar px-3 pb-6 pt-1">
+
+    <!-- HOME -->
+    <section id="screen-home" class="screen space-y-3">
+      <!-- Daily hero -->
+      <div class="card-amber p-4">
+        <div class="flex items-center justify-between">
+          <span class="section-title">Daily Knot</span>
+          <span id="dailyTimer" class="text-[10px] font-extrabold tabular-nums text-ink-700/60"></span>
+        </div>
+        <p id="dailyStatus" class="mt-1 font-display text-base font-extrabold text-ink-900">Play today's special puzzle</p>
+        <p id="dailySub" class="text-[12px] font-semibold text-ink-700/80 mt-0.5">Extend your streak 🔥</p>
+        <button id="btnDaily" class="btn-primary mt-3 w-full rounded-xl py-3 font-display text-base font-extrabold tracking-wide">Play Daily Knot</button>
+      </div>
+
+      <!-- Continue hero -->
+      <div class="card-hero p-4">
+        <div class="flex items-center justify-between gap-2">
+          <span class="section-title">Campaign</span>
+          <span id="chapterChip" class="chapter-chip">🌿 The Beginning</span>
+        </div>
+        <div class="flex items-end gap-2 mt-2">
+          <div>
+            <p class="text-[10px] font-extrabold uppercase tracking-wider text-ink-700/60 leading-none">Level</p>
+            <p class="level-hero leading-none mt-0.5" id="currentLevelNum">1</p>
+          </div>
+          <div class="flex-1 min-w-0 pb-1">
+            <p id="currentLevelSub" class="text-[12px] font-bold text-ink-700/80 leading-snug">Your journey begins</p>
+            <p id="moodLine" class="mood-line"></p>
+          </div>
+        </div>
+        <button id="btnContinue" class="btn-primary mt-3 w-full rounded-xl py-3.5 font-display text-base font-extrabold tracking-wide">Continue →</button>
+        <button id="btnPrestige" class="btn-gold mt-2 w-full rounded-xl py-2.5 text-sm font-extrabold hidden">
+          👑 Prestige → ×1.2 threads
+        </button>
+        <div id="recentLevels" class="mt-3 flex gap-2 overflow-x-auto no-scrollbar pb-1"></div>
+      </div>
+
+      <!-- Missions -->
+      <div class="card p-4">
+        <div class="flex items-center justify-between mb-1.5">
+          <span class="section-title">Today's Missions</span>
+          <span id="missionsProgress" class="text-[10px] font-extrabold text-ink-700/60">0/3</span>
+        </div>
+        <div id="missionsList" class="space-y-0.5"></div>
+        <p id="missionsBonus" class="mt-2 text-[10px] font-extrabold text-gold-600 hidden">🎁 Complete all 3 → +3 🧵</p>
+      </div>
+
+      <!-- Stats -->
+      <div class="grid grid-cols-3 gap-2">
+        <div class="card p-2.5 text-center">
+          <p class="text-[9px] font-extrabold uppercase tracking-[0.14em] text-terra-600">Solved</p>
+          <p id="statSolved" class="font-display text-xl font-extrabold text-ink-900 leading-none mt-0.5">0</p>
+        </div>
+        <div class="card p-2.5 text-center">
+          <p class="text-[9px] font-extrabold uppercase tracking-[0.14em] text-terra-600">Best ★</p>
+          <p id="statBest" class="font-display text-xl font-extrabold text-ink-900 leading-none mt-0.5">0</p>
+        </div>
+        <div class="card p-2.5 text-center">
+          <p class="text-[9px] font-extrabold uppercase tracking-[0.14em] text-terra-600">Shields</p>
+          <p id="statShields" class="font-display text-xl font-extrabold text-ink-900 leading-none mt-0.5">0</p>
+        </div>
+      </div>
+
+      <!-- Skins & features -->
+      <div class="card p-4">
+        <div class="flex items-center justify-between mb-2">
+          <span class="section-title">Node Skins</span>
+          <span id="skinsCount" class="text-[10px] font-extrabold text-ink-700/60"></span>
+        </div>
+        <div id="skinRow" class="flex gap-2 overflow-x-auto no-scrollbar pb-1"></div>
+        <div id="featureToggles" class="mt-3 space-y-2"></div>
+      </div>
+    </section>
+
+    <!-- GAME -->
+    <section id="screen-game" class="screen hidden flex-1 flex flex-col min-h-0">
+      <div class="flex items-center justify-between mb-2 gap-2">
+        <button id="btnBack" class="btn-icon" aria-label="Back">←</button>
+        <div class="text-center flex-1">
+          <p id="gameLabel" class="font-display text-base font-extrabold text-ink-900 leading-tight">Level 1</p>
+          <p id="movesDisplay" class="text-[10px] font-extrabold uppercase tracking-wider text-ink-700/60">0 moves</p>
+        </div>
+        <button id="btnCB" class="btn-icon" aria-label="Colorblind toggle" title="Colorblind mode">🎨</button>
+        <button id="btnHint" class="btn-icon" aria-label="Hint">💡</button>
+      </div>
+
+      <div id="mercyBanner" class="hidden mercy-banner mb-2 rounded-2xl p-2.5 flex items-center gap-2">
+        <div class="text-xl leading-none">🕊️</div>
+        <div class="flex-1 min-w-0">
+          <p class="text-[11px] font-extrabold text-ink-900 leading-tight">The knots sense your weight.</p>
+          <p class="text-[10px] font-bold text-ink-700/70 leading-tight">Shall we soften this one?</p>
+        </div>
+        <button id="btnMercy" class="btn-gold rounded-lg px-3 py-1.5 text-[11px] font-extrabold shrink-0">Free</button>
+        <button id="btnMercyNo" class="h-7 w-7 grid place-items-center rounded-full bg-white/60 text-[11px] font-extrabold text-ink-700/60 shrink-0">✕</button>
+      </div>
+
+      <div class="flex items-center gap-2 mb-2 px-1">
+        <div class="flex-1 h-2 bg-white/60 rounded-full overflow-hidden shadow-inner border border-cream-200">
+          <div id="progressBar" class="h-full bg-gradient-to-r from-teal-500 to-teal-600 rounded-full transition-all duration-300" style="width: 0%"></div>
+        </div>
+        <span id="progressLabel" class="text-[10px] font-extrabold tabular-nums text-ink-700/70 w-9 text-right">0/0</span>
+      </div>
+
+      <div id="boardWrap" class="relative flex-1 min-h-0">
+        <svg id="board" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" aria-label="Untangle board"></svg>
+        <span id="cbChip" class="hidden absolute top-2 right-2 text-[9px] font-extrabold text-blue-700 bg-blue-100 border border-blue-300 rounded-full px-2 py-0.5">🎨 CB</span>
+        <div id="tutorialOverlay" class="hidden">
+          <div class="tut-bubble">
+            <p class="font-display text-base font-extrabold text-cream-50">Drag any node <span class="tut-arrow">👇</span></p>
+            <p class="mt-1 text-[12px] font-bold text-cream-200/85 leading-snug">Untangle the lines. Remove all knots.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-2 card px-3 py-2 flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2 min-w-0">
+          <span class="h-2 w-2 rounded-full bg-coral-500 animate-pulse shrink-0"></span>
+          <span class="text-[11px] font-extrabold uppercase tracking-wider text-ink-700">Knots</span>
+          <span id="crossingsCount" class="font-display text-lg font-extrabold text-coral-600 leading-none">0</span>
+          <span id="bestDisplay" class="text-[10px] font-extrabold text-ink-700/60 ml-1 truncate"></span>
+        </div>
+        <button id="btnSoften" class="btn-ghost rounded-lg px-2.5 py-1 text-[10px] font-extrabold shrink-0">
+          🕊️ 2 🧵
+        </button>
+      </div>
+
+      <div id="completeOverlay" class="hidden">
+        <div class="complete-card">
+          <div id="chapterBanner" class="chapter-banner hidden">
+            <span class="cb-title">Chapter Unlocked</span>
+            <span class="cb-name" id="chapterBannerName">The Silk Road</span>
+          </div>
+          <div id="milestoneBanner" class="milestone-banner hidden">🎉 Milestone!</div>
+          <p id="completeTitle" class="font-display text-2xl font-extrabold text-ink-900">Untangled!</p>
+          <p id="completeMoves" class="mt-1 text-[13px] font-bold text-ink-700/80">in 0 moves</p>
+          <div id="completeStars" class="mt-2"></div>
+          <p id="threadsEarned" class="mt-1 text-[12px] font-extrabold text-gold-600 hidden"></p>
+          <p id="sessionLine" class="mt-1 text-[11px] font-extrabold text-terra-600 hidden"></p>
+          <p id="unlockLine" class="mt-2 rounded-xl bg-gold-400/25 px-2 py-1.5 text-[11px] font-extrabold text-ink-900 hidden"></p>
+          <div class="mt-3 space-y-2">
+            <button id="btnNext" class="btn-primary w-full rounded-xl py-3.5 font-display text-base font-extrabold tracking-wide">Next</button>
+            <button id="btnShare" class="btn-ghost w-full rounded-xl py-2.5 text-sm font-extrabold">📤 Share</button>
+            <button id="btnHome" class="btn-ghost w-full rounded-xl py-2.5 text-sm font-extrabold">Home</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="achievementOverlay" class="hidden">
+    <div class="complete-card" style="max-width: 360px; max-height: 82vh; overflow-y: auto;">
+      <p class="font-display text-xl font-extrabold text-ink-900 mb-1">🏆 Achievements</p>
+      <p id="achCount" class="text-[11px] font-extrabold text-ink-700/60 mb-3">0 / 10 unlocked</p>
+      <div id="achievementList" class="text-left"></div>
+      <button id="btnAchClose" class="btn-primary w-full mt-3 rounded-xl py-2.5 font-display text-sm font-extrabold">Close</button>
+    </div>
+  </div>
+
+  <div id="prestigeOverlay" class="hidden">
+    <div class="complete-card">
+      <p class="font-display text-2xl font-extrabold text-ink-900">👑 Prestige?</p>
+      <p class="mt-2 text-[13px] font-bold text-ink-700/80 leading-snug">
+        Your campaign resets to Level 1. You keep threads, achievements, skins, unlocks, and your streak.
+      </p>
+      <div class="mt-3 rounded-xl bg-gold-400/25 px-3 py-2 text-[12px] font-extrabold text-ink-900">
+        <span id="prestigeBefore">×1.0</span> → <span id="prestigeAfter" class="text-gold-600">×1.2</span> threads
+      </div>
+      <div class="mt-4 space-y-2">
+        <button id="btnPrestigeYes" class="btn-gold w-full rounded-xl py-3 font-display text-base font-extrabold">Prestige</button>
+        <button id="btnPrestigeNo" class="btn-ghost w-full rounded-xl py-2.5 text-sm font-extrabold">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+</div>
+
+<div id="installBanner" class="hidden">
+  <span>📱 Install Untangle?</span>
+  <button id="btnInstall">Install</button>
+  <button id="btnInstallDismiss" style="background:transparent;color:#fff;padding:2px 6px;">✕</button>
+</div>
+
+<pre id="bootError"></pre>
+
+<script>
+/* =============================================================
+   UNTANGLE v7 — remastered UI + colorblind fix + next bundle
+   ============================================================= */
+(function () {
+  'use strict';
+
+  var STORE_KEY = 'untangle.v4';
+
+  function showBootError(err) {
+    var el = document.getElementById('bootError');
+    if (!el) return;
+    el.style.display = 'block';
+    el.textContent = 'BOOT FAILED\n\n' + (err && err.stack ? err.stack : String(err));
+  }
+
+  /* -------------------- ANALYTICS + Firebase hook -------------------- */
+  window.Untangle = window.Untangle || {};
+  window.Untangle._eventQueue = [];
+  window.Untangle._handler = null;
+  window.Untangle.setAnalyticsHandler = function (fn) {
+    window.Untangle._handler = typeof fn === 'function' ? fn : null;
+  };
+  window.Untangle.trackEvent = function (name, props) {
+    try {
+      var ev = { name: name, props: props || {}, ts: Date.now() };
+      console.log('[analytics]', ev.name, ev.props);
+      window.Untangle._eventQueue.push(ev);
+      if (window.Untangle._eventQueue.length > 200) window.Untangle._eventQueue.shift();
+      if (window.Untangle._handler) {
+        try { window.Untangle._handler(name, props); } catch (e) {}
+      }
+      // Firebase stub: if window.Capacitor.Plugins.FirebaseAnalytics is present
+      var fa = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.FirebaseAnalytics;
+      if (fa && fa.logEvent) {
+        try { fa.logEvent({ name: name, params: props || {} }); } catch (e) {}
+      }
+    } catch (e) {}
+  };
+  function track(name, props) { window.Untangle.trackEvent(name, props); }
+
+  /* -------------------- CHAPTERS -------------------- */
+  var CHAPTERS = [
+    { id: 'cream',   name: 'The Beginning', at: 0,  emoji: '🌿',
+      bgTop: '#FFFFFF', bgMid: '#FAF3E8', bgBot: '#F3E4CB', dot: '#E8CFA8' },
+    { id: 'silk',    name: 'The Silk Road', at: 15, emoji: '🧵',
+      bgTop: '#FFFBF0', bgMid: '#FEF3D6', bgBot: '#F5D9A0', dot: '#E0C088' },
+    { id: 'winter',  name: 'Winter Spice',  at: 30, emoji: '❄️',
+      bgTop: '#F8FBFF', bgMid: '#E8F0FA', bgBot: '#CFDDED', dot: '#A8BCD4' },
+    { id: 'monsoon', name: 'Monsoon',       at: 45, emoji: '🌧️',
+      bgTop: '#F0F5F0', bgMid: '#D9E5D9', bgBot: '#B8CCB8', dot: '#8DA88D' },
+    { id: 'aurora',  name: 'Aurora',        at: 60, emoji: '✨',
+      bgTop: '#F5EEFF', bgMid: '#E5D7FA', bgBot: '#C8B0E8', dot: '#A888D4' }
+  ];
+  function chapterForLevel(levelIndex) {
+    var result = CHAPTERS[0];
+    for (var i = 0; i < CHAPTERS.length; i++) {
+      if (levelIndex >= CHAPTERS[i].at) result = CHAPTERS[i];
+    }
+    return result;
+  }
+
+  /* -------------------- Unlocks & skins -------------------- */
+  var UNLOCKS = [
+    { id: 'threads',     level: 2,  name: 'Loose Threads',   desc: 'Earn 🧵 for every level you solve', icon: '🧵' },
+    { id: 'amethyst',    level: 5,  name: 'Amethyst Nodes',  desc: 'A new skin for your knots', icon: '💜' },
+    { id: 'bestPreview', level: 10, name: 'Best Moves',      desc: 'See your record on replays', icon: '📊' },
+    { id: 'rosegold',    level: 15, name: 'Rose Gold Nodes', desc: 'A new skin for your knots', icon: '🌹' },
+    { id: 'shield',      level: 20, name: 'Streak Shield',   desc: 'Protects your daily streak once', icon: '🛡️' },
+    { id: 'golden',      level: 25, name: 'Golden Nodes',    desc: 'A new skin for your knots', icon: '✨' },
+    { id: 'zen',         level: 30, name: 'Zen Mode',        desc: 'Hide the counter. Just solve.', icon: '🧘' },
+    { id: 'obsidian',    level: 40, name: 'Obsidian Nodes',  desc: 'A new skin for your knots', icon: '🖤' },
+    { id: 'godfather',   level: 50, name: 'Godfather Mode',  desc: 'Harder game. Double threads. You in?', icon: '🎩' }
+  ];
+
+  var SKINS = {
+    teal:     { id:'teal',     name:'Teal',      from:'#2DD4BF', to:'#0F766E', edge:'#0B5D57', at:0  },
+    amethyst: { id:'amethyst', name:'Amethyst',  from:'#C4B5FD', to:'#7C3AED', edge:'#5B21B6', at:5  },
+    rosegold: { id:'rosegold', name:'Rose Gold', from:'#FECDD3', to:'#E11D48', edge:'#9F1239', at:15 },
+    golden:   { id:'golden',   name:'Golden',    from:'#FEF3C7', to:'#F59E0B', edge:'#B45309', at:25 },
+    obsidian: { id:'obsidian', name:'Obsidian',  from:'#6B7280', to:'#111827', edge:'#000000', at:40 },
+    godfather:{ id:'godfather',name:'Godfather', from:'#FCD34D', to:'#78350F', edge:'#1C1917', at:999, minPrestige:1 }
+  };
+
+  var ACHIEVEMENTS = [
+    { id: 'firstChai',     name: 'First Chai',      desc: 'Solve your first level',            icon: '☕' },
+    { id: 'perfectionist', name: 'Perfectionist',   desc: 'Get a 3-star on any level',          icon: '⭐' },
+    { id: 'flawless',      name: 'Flawless',        desc: 'Solve a level at exact par',         icon: '🎯' },
+    { id: 'untouchable',   name: 'Untouchable',     desc: 'Solve in 2 moves or fewer',          icon: '⚡' },
+    { id: 'knotCollector', name: 'Knot Collector',  desc: 'Solve 10 levels',                    icon: '🧶' },
+    { id: 'veteran',       name: 'Veteran',         desc: 'Solve 50 levels',                    icon: '🏅' },
+    { id: 'merchant',      name: 'Merchant',        desc: 'Earn 20 threads lifetime',           icon: '💰' },
+    { id: 'streakLord',    name: 'Streak Lord',     desc: 'Reach a 7-day daily streak',         icon: '🔥' },
+    { id: 'ghost',         name: 'Ghost',           desc: 'Solve without creating a new knot',  icon: '👻' },
+    { id: 'godfather',     name: 'Godfather',       desc: 'Clear a level with Godfather Mode on', icon: '🎩' }
+  ];
+
+  var MISSIONS_POOL = [
+    { id: 'campaign1', label: 'Solve 1 campaign level',  icon: '📘', check: function (p) { return p.levelSolves >= 1; } },
+    { id: 'campaign3', label: 'Solve 3 campaign levels', icon: '📚', check: function (p) { return p.levelSolves >= 3; } },
+    { id: 'threestar', label: 'Get a 3★ today',          icon: '⭐', check: function (p) { return p.threeStar >= 1; } },
+    { id: 'nohint',    label: 'Solve without a hint',    icon: '🚫', check: function (p) { return p.noHintSolves >= 1; } },
+    { id: 'daily',     label: 'Play the Daily Knot',     icon: '🔥', check: function (p) { return p.dailyPlayed >= 1; } },
+    { id: 'threads2',  label: 'Earn 2 threads',          icon: '🧵', check: function (p) { return p.threadsEarned >= 2; } },
+    { id: 'perfect',   label: 'Solve at exact par',      icon: '🎯', check: function (p) { return p.parSolves >= 1; } },
+    { id: 'combo',     label: 'Untangle 2 knots in one drag', icon: '💥', check: function (p) { return p.comboAchieved >= 1; } }
+  ];
+
+  /* -------------------- Storage -------------------- */
+  function defaultStore() {
+    return {
+      levels: {}, currentLevel: 0,
+      dailyStreak: 0, lastDailyDate: null, dailyDone: {},
+      totalMoves: 0, totalSolved: 0, bestStars: 0,
+      hintsUsed: {}, soundOn: true,
+      psr: 50, threads: 0, lifetimeThreadsEarned: 0,
+      mercyLevels: {}, unlocks: [],
+      selectedSkin: 'teal',
+      zenMode: false, godfatherMode: false,
+      streakShield: 0,
+      tutorialDone: false,
+      achievements: {}, missions: null,
+      colorblind: false,
+      prestige: 0
+    };
+  }
+  function loadStore() {
+    try {
+      var raw = localStorage.getItem(STORE_KEY);
+      if (!raw) return defaultStore();
+      return Object.assign(defaultStore(), JSON.parse(raw));
+    } catch (e) { return defaultStore(); }
+  }
+
+  /* -------------------- Date helpers -------------------- */
+  function pad2(n) { return String(n).padStart(2, '0'); }
+  function dateKey(d) {
+    d = d || new Date();
+    return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+  }
+  function shiftKey(k, days) {
+    var p = k.split('-').map(Number);
+    var dt = new Date(p[0], p[1] - 1, p[2]);
+    dt.setDate(dt.getDate() + days);
+    return dateKey(dt);
+  }
+  function dayIndex(d) {
+    d = d || new Date();
+    return Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000);
+  }
+  function dailySeed() {
+    var d = new Date();
+    return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+  }
+  function timeToMidnight() {
+    var now = new Date();
+    var mid = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    var s = Math.max(0, Math.floor((mid - now) / 1000));
+    var h = Math.floor(s / 3600); s -= h * 3600;
+    var m = Math.floor(s / 60);   s -= m * 60;
+    return pad2(h) + ':' + pad2(m) + ':' + pad2(s);
+  }
+
+  /* -------------------- Audio / Haptics -------------------- */
+  var audioCtx = null;
+  function getAudio() {
+    if (!audioCtx) {
+      try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+      catch (e) { return null; }
+    }
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+  }
+  function beep(freq, dur, type, vol) {
+    if (!app.store.soundOn) return;
+    var ctx = getAudio(); if (!ctx) return;
+    type = type || 'sine'; vol = (vol == null) ? 0.05 : vol;
+    var osc = ctx.createOscillator(); var gain = ctx.createGain();
+    osc.type = type; osc.frequency.value = freq;
+    gain.gain.setValueAtTime(vol, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + dur);
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(); osc.stop(ctx.currentTime + dur + 0.01);
+  }
+  var lastBeep = 0;
+  function softBeep(freq) {
+    var now = performance.now();
+    if (now - lastBeep < 65) return;
+    lastBeep = now; beep(freq, 0.035, 'sine', 0.04);
+  }
+  function buzz(pattern) {
+    try { if (navigator.vibrate) navigator.vibrate(pattern); } catch (e) {}
+  }
+
+  var toastTimer = null;
+  function toast(msg, ms) {
+    ms = ms || 2400;
+    var el = document.getElementById('toast');
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { el.classList.remove('show'); }, ms);
+  }
+
+  /* -------------------- AdMob -------------------- */
+  var AD_UNITS = {
+    interstitial: 'ca-app-pub-3940256099942544/1033173712',
+    rewarded:     'ca-app-pub-3940256099942544/5224354917'
+  };
+  function isNative() {
+    return !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function'
+              && window.Capacitor.isNativePlatform());
+  }
+  function getAdMob() {
+    return (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob) || null;
+  }
+  async function showInterstitialAd() {
+    track('ad_interstitial_request');
+    if (!isNative()) return false;
+    var A = getAdMob(); if (!A) return false;
+    try {
+      await A.prepareInterstitial({ adId: AD_UNITS.interstitial, isTesting: true });
+      await A.showInterstitial(); return true;
+    } catch (e) { return false; }
+  }
+  async function showRewardedAd() {
+    track('ad_rewarded_request');
+    if (!isNative()) { return true; }
+    var A = getAdMob(); if (!A) return false;
+    try {
+      await A.prepareRewardVideoAd({ adId: AD_UNITS.rewarded, isTesting: true });
+      var r = await A.showRewardVideoAd(); return !!r;
+    } catch (e) { return false; }
+  }
+  window.Untangle.showInterstitialAd = showInterstitialAd;
+  window.Untangle.showRewardedAd = showRewardedAd;
+
+  /* ============================================================
+     DDA
+     ============================================================ */
+  function updatePSR(stars, moves, par) {
+    var ratio = par > 0 ? Math.max(-1, Math.min(1, (par - moves) / par)) : 0;
+    var target = 50 + ratio * 40 + (stars - 2) * 10;
+    target = Math.max(10, Math.min(90, target));
+    var weight = target < app.store.psr ? 0.35 : 0.15;
+    app.store.psr = Math.max(10, Math.min(90, app.store.psr * (1 - weight) + target * weight));
+  }
+  function getPSROffset() {
+    var p = app.store.psr;
+    if (p >= 75) return 2;
+    if (p >= 60) return 1;
+    if (p >= 40) return 0;
+    if (p >= 25) return -1;
+    return -2;
+  }
+  function baseLevelConfig(index) {
+    var nodes = Math.min(12, 5 + Math.floor(index / 3));
+    var capEdges = 2 * nodes - 3;
+    var edges = Math.min(capEdges, 4 + Math.floor(index / 2));
+    if (index > 0 && index % 5 === 4) edges = Math.min(capEdges, edges + 1);
+    return { nodes: nodes, edges: edges };
+  }
+  function ddaLevelConfig(index) {
+    var base = baseLevelConfig(index);
+    if (index < 3) return base;
+    var offset = getPSROffset();
+    if (app.store.mercyLevels[index]) offset = Math.min(offset, -1);
+    if ((app.attemptCounts[index] || 0) >= 2) offset = Math.max(-2, offset - 1);
+    if (app.store.godfatherMode && offset >= 0) offset = offset + 1;
+    offset = Math.max(-2, Math.min(4, offset));
+    var nodeDelta = offset >= 0 ? Math.ceil(offset / 2) : Math.floor(offset / 2);
+    var nodes = Math.max(5, Math.min(13, base.nodes + nodeDelta));
+    var capEdges = 2 * nodes - 3;
+    var edges = Math.max(4, Math.min(capEdges, base.edges + offset));
+    return { nodes: nodes, edges: edges };
+  }
+  function getMoodLine() {
+    var p = app.store.psr;
+    if (p >= 80) return '😤 The knots fear you';
+    if (p >= 65) return '💪 The knots are testing you';
+    if (p >= 50) return '🌿 The knots are waiting';
+    if (p >= 35) return '☕ The knots are gentle today';
+    return '🕊️ Take your time. No rush';
+  }
+
+  /* ============================================================
+     PUZZLE GENERATION
+     ============================================================ */
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = a + 0x6D2B79F5 | 0;
+      var t = a;
+      t = Math.imul(t ^ t >>> 15, t | 1);
+      t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+  function cross(o, a, b) { return (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x); }
+  function segsIntersect(p1, p2, p3, p4) {
+    var d1 = cross(p3, p4, p1), d2 = cross(p3, p4, p2);
+    var d3 = cross(p1, p2, p3), d4 = cross(p1, p2, p4);
+    return ((d1 > 0 && d2 < 0) || (d1 < 0 && d2 > 0)) &&
+           ((d3 > 0 && d4 < 0) || (d3 < 0 && d4 > 0));
+  }
+  function lineIntersection(p1, p2, p3, p4) {
+    var d = (p1.x - p2.x) * (p3.y - p4.y) - (p1.y - p2.y) * (p3.x - p4.x);
+    if (Math.abs(d) < 1e-10) return null;
+    var t = ((p1.x - p3.x) * (p3.y - p4.y) - (p1.y - p3.y) * (p3.x - p4.x)) / d;
+    return { x: p1.x + t * (p2.x - p1.x), y: p1.y + t * (p2.y - p1.y) };
+  }
+  function computeCrossings(nodes, edges) {
+    var count = 0, pairs = [], points = [];
+    for (var i = 0; i < edges.length; i++) {
+      for (var j = i + 1; j < edges.length; j++) {
+        var a = edges[i][0], b = edges[i][1];
+        var c = edges[j][0], d = edges[j][1];
+        if (a === c || a === d || b === c || b === d) continue;
+        if (segsIntersect(nodes[a], nodes[b], nodes[c], nodes[d])) {
+          count++;
+          pairs.push([i, j]);
+          var pt = lineIntersection(nodes[a], nodes[b], nodes[c], nodes[d]);
+          if (pt) points.push(pt);
+        }
+      }
+    }
+    return { count: count, pairs: pairs, points: points };
+  }
+  function chordsCross(a, b, c, d) {
+    function betw(x, lo, hi) { return lo < hi ? x > lo && x < hi : x > lo || x < hi; }
+    return (betw(c, a, b) !== betw(d, a, b)) && (betw(a, c, d) !== betw(b, c, d));
+  }
+  function generatePuzzle(seed, numNodes, numEdges) {
+    var rng = mulberry32(seed);
+    var MAX_EDGES = 2 * numNodes - 3;
+    numEdges = Math.min(numEdges, MAX_EDGES);
+    var edges = [], seen = {};
+    function addEdge(a, b) {
+      if (a === b) return false;
+      var k = Math.min(a, b) + '-' + Math.max(a, b);
+      if (seen[k]) return false;
+      for (var e = 0; e < edges.length; e++) {
+        var c = edges[e][0], d = edges[e][1];
+        if (a === c || a === d || b === c || b === d) continue;
+        if (chordsCross(a, b, c, d)) return false;
+      }
+      edges.push([a, b]); seen[k] = true; return true;
+    }
+    for (var i = 0; i < numNodes && edges.length < numEdges; i++) addEdge(i, (i + 1) % numNodes);
+    var attempts = 0;
+    while (edges.length < numEdges && attempts < 6000) {
+      attempts++;
+      addEdge(Math.floor(rng() * numNodes), Math.floor(rng() * numNodes));
+    }
+    if (edges.length < numEdges) return null;
+    for (var attempt = 0; attempt < 80; attempt++) {
+      var pos = [], ok = true;
+      for (var n = 0; n < numNodes; n++) {
+        var placed = false;
+        for (var tries = 0; tries < 50; tries++) {
+          var x = 12 + rng() * 76, y = 12 + rng() * 76;
+          var tooClose = false;
+          for (var k = 0; k < pos.length; k++) {
+            if (Math.hypot(pos[k].x - x, pos[k].y - y) <= 11) { tooClose = true; break; }
+          }
+          if (!tooClose) { pos.push({ x: x, y: y }); placed = true; break; }
+        }
+        if (!placed) { ok = false; break; }
+      }
+      if (!ok) continue;
+      var c = computeCrossings(pos, edges);
+      if (c.count >= 1) return { nodes: pos, edges: edges, initialCrossings: c.count };
+    }
+    return null;
+  }
+  function generateWithRetry(seed, numNodes, numEdges) {
+    for (var s = 0; s < 40; s++) {
+      var p = generatePuzzle(seed + s * 97, numNodes, numEdges);
+      if (p) return p;
+    }
+    return {
+      nodes: [{x:20,y:20},{x:80,y:20},{x:20,y:80},{x:80,y:80}],
+      edges: [[0,1],[1,2],[2,3],[3,0]], initialCrossings: 1
+    };
+  }
+  function dailyConfig() {
+    var dow = new Date().getDay();
+    return [
+      { nodes: 6, edges: 7  }, { nodes: 7, edges: 9  }, { nodes: 8, edges: 11 },
+      { nodes: 7, edges: 10 }, { nodes: 9, edges: 12 }, { nodes: 8, edges: 11 },
+      { nodes: 9, edges: 13 }
+    ][dow];
+  }
+
+  /* ============================================================
+     MISSIONS
+     ============================================================ */
+  function getTodayMissionIds() {
+    var ids = MISSIONS_POOL.map(function (m) { return m.id; });
+    var rng = mulberry32(dayIndex() * 7777 + 131);
+    for (var i = ids.length - 1; i > 0; i--) {
+      var j = Math.floor(rng() * (i + 1));
+      var tmp = ids[i]; ids[i] = ids[j]; ids[j] = tmp;
+    }
+    return ids.slice(0, 3);
+  }
+  function emptyProgress() {
+    return { levelSolves: 0, threeStar: 0, noHintSolves: 0,
+      dailyPlayed: 0, threadsEarned: 0, parSolves: 0, comboAchieved: 0 };
+  }
+  function ensureMissionsToday() {
+    var m = app.store.missions;
+    if (!m || m.date !== app.todayDate) {
+      app.store.missions = {
+        date: app.todayDate,
+        ids: getTodayMissionIds(),
+        progress: emptyProgress(),
+        completed: {},
+        bonusClaimed: false
+      };
+      saveStore();
+    }
+  }
+  function updateMissionProgress(key, amount) {
+    ensureMissionsToday();
+    var m = app.store.missions;
+    if (m.progress[key] == null) return;
+    m.progress[key] += (amount || 1);
+    var newly = [];
+    m.ids.forEach(function (id) {
+      if (m.completed[id]) return;
+      var def = null;
+      for (var i = 0; i < MISSIONS_POOL.length; i++) {
+        if (MISSIONS_POOL[i].id === id) { def = MISSIONS_POOL[i]; break; }
+      }
+      if (def && def.check(m.progress)) {
+        m.completed[id] = true;
+        newly.push(def);
+        track('mission_complete', { id: id });
+      }
+    });
+    if (newly.length > 0) {
+      setTimeout(function () {
+        toast('🎯 Mission: ' + newly[0].label, 2400);
+        beep(800, 0.1, 'sine', 0.06);
+        buzz(15);
+      }, 100);
+    }
+    var allDone = m.ids.every(function (id) { return m.completed[id]; });
+    if (allDone && !m.bonusClaimed) {
+      m.bonusClaimed = true;
+      addThreads(3);
+      setTimeout(function () { toast('🎁 All missions done! +3 🧵', 3000); }, 600);
+      track('missions_all_complete');
+    }
+    saveStore();
+    var sh = document.getElementById('screen-home');
+    if (sh && !sh.classList.contains('hidden')) renderMissions();
+  }
+
+  /* ============================================================
+     ACHIEVEMENTS
+     ============================================================ */
+  function checkAchievements(ctx) {
+    ctx = ctx || {};
+    var st = app.store;
+    var fired = [];
+    function tryUnlock(id, condition) {
+      if (condition && !st.achievements[id]) {
+        st.achievements[id] = Date.now();
+        fired.push(id);
+        track('achievement_unlock', { id: id });
+      }
+    }
+    tryUnlock('firstChai', st.totalSolved >= 1);
+    tryUnlock('perfectionist', st.bestStars >= 3);
+    tryUnlock('flawless', ctx.par > 0 && ctx.moves === ctx.par);
+    tryUnlock('untouchable', ctx.moves > 0 && ctx.moves <= 2);
+    tryUnlock('knotCollector', st.totalSolved >= 10);
+    tryUnlock('veteran', st.totalSolved >= 50);
+    tryUnlock('merchant', st.lifetimeThreadsEarned >= 20);
+    tryUnlock('streakLord', st.dailyStreak >= 7);
+    tryUnlock('ghost', ctx.mode === 'level' && ctx.moves > 0 && !ctx.hadNewCrossing);
+    tryUnlock('godfather', ctx.godfather === true);
+    if (fired.length > 0) {
+      saveStore();
+      fired.forEach(function (id, idx) {
+        var def = null;
+        for (var i = 0; i < ACHIEVEMENTS.length; i++) {
+          if (ACHIEVEMENTS[i].id === id) { def = ACHIEVEMENTS[i]; break; }
+        }
+        if (!def) return;
+        setTimeout(function () {
+          toast('🏆 ' + def.name + ' — ' + def.desc, 2800);
+          beep(880, 0.12, 'sine', 0.07);
+          buzz([10, 30, 10]);
+        }, 400 + idx * 900);
+      });
+    }
+  }
+
+  /* ============================================================
+     APP STATE
+     ============================================================ */
+  var app = {
+    store: loadStore(),
+    mode: 'level', levelIndex: 0,
+    nodes: null, edges: null,
+    crossings: { count: 0, pairs: [], points: [] },
+    initialCrossings: 0, moveCount: 0,
+    dragState: null, dragStartCrossings: 0,
+    hintNode: -1, hintUsedThisPlay: false, solved: false,
+    todayDate: dateKey(), sessionStreak: 0,
+    attemptCounts: {}, abandonCounts: {},
+    levelStartTime: 0, mercyTimer: null,
+    hadNewCrossing: false
+  };
+
+  function saveStore() {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(app.store)); } catch (e) {}
+  }
+  function currentSkin() { return SKINS[app.store.selectedSkin] || SKINS.teal; }
+  function addThreads(amount) {
+    app.store.threads += amount;
+    app.store.lifetimeThreadsEarned += amount;
+    saveStore();
+    var el = document.getElementById('hdrThreads');
+    if (el) el.textContent = app.store.threads;
+    checkAchievements({});
+  }
+  function prestigeMultiplier() { return 1 + app.store.prestige * 0.2; }
+
+  /* ============================================================
+     CHAPTER THEME
+     ============================================================ */
+  function applyChapterTheme() {
+    var ch = chapterForLevel(app.store.currentLevel);
+    var phone = document.getElementById('phone');
+    if (phone) {
+      phone.style.setProperty('--bg-top', ch.bgTop);
+      phone.style.setProperty('--bg-mid', ch.bgMid);
+      phone.style.setProperty('--bg-bot', ch.bgBot);
+    }
+    var chip = document.getElementById('chapterChip');
+    if (chip) chip.textContent = ch.emoji + ' ' + ch.name;
+  }
+
+  /* ============================================================
+     SCREEN ROUTER
+     ============================================================ */
+  function showScreen(name) {
+    ['home', 'game'].forEach(function (n) {
+      var el = document.getElementById('screen-' + n);
+      if (!el) return;
+      el.classList.toggle('hidden', n !== name);
+      if (n === name) {
+        el.classList.remove('screen');
+        void el.offsetWidth;
+        el.classList.add('screen');
+      }
+    });
+    var main = document.getElementById('main');
+    if (main) main.scrollTop = 0;
+  }
+
+  /* ============================================================
+     HOME RENDER
+     ============================================================ */
+  function renderHome() {
+    var st = app.store;
+    ensureMissionsToday();
+    applyChapterTheme();
+
+    var el;
+    el = document.getElementById('hdrStreak'); if (el) el.textContent = st.dailyStreak;
+    el = document.getElementById('hdrThreads'); if (el) el.textContent = st.threads;
+    el = document.getElementById('statSolved'); if (el) el.textContent = st.totalSolved;
+    el = document.getElementById('statBest'); if (el) el.textContent = st.bestStars + '★';
+    el = document.getElementById('statShields'); if (el) el.textContent = st.streakShield;
+    el = document.getElementById('moodLine'); if (el) el.textContent = getMoodLine();
+    el = document.getElementById('btnMute'); if (el) el.textContent = st.soundOn ? '🔊' : '🔇';
+
+    var badge = document.getElementById('prestigeBadge');
+    if (badge) {
+      if (st.prestige > 0) {
+        badge.classList.remove('hidden');
+        var pc = document.getElementById('prestigeCount');
+        if (pc) pc.textContent = st.prestige;
+      } else badge.classList.add('hidden');
+    }
+
+    var doneToday = !!st.dailyDone[app.todayDate];
+    var dBtn = document.getElementById('btnDaily');
+    if (dBtn) {
+      if (doneToday) {
+        dBtn.disabled = true; dBtn.textContent = '✓ Done for today';
+        var ds = document.getElementById('dailyStatus'); if (ds) ds.textContent = 'Come back tomorrow ☕';
+        var dsub = document.getElementById('dailySub');
+        if (dsub) dsub.innerHTML = 'Next knot in <span class="js-countdown tabular-nums">' + timeToMidnight() + '</span>';
+        var dt = document.getElementById('dailyTimer'); if (dt) dt.textContent = '';
+      } else {
+        dBtn.disabled = false; dBtn.textContent = 'Play Daily Knot';
+        var ds2 = document.getElementById('dailyStatus'); if (ds2) ds2.textContent = "Play today's special puzzle";
+        var dsub2 = document.getElementById('dailySub'); if (dsub2) dsub2.textContent = 'Extend your streak 🔥';
+        var dt2 = document.getElementById('dailyTimer');
+        if (dt2) dt2.innerHTML = '<span class="js-countdown tabular-nums">' + timeToMidnight() + '</span>';
+      }
+    }
+
+    var cur = st.currentLevel;
+    var clNum = document.getElementById('currentLevelNum'); if (clNum) clNum.textContent = cur + 1;
+    var lastRec = st.levels[cur - 1];
+    var clSub = document.getElementById('currentLevelSub');
+    if (clSub) {
+      if (cur === 0) clSub.textContent = 'Your journey begins';
+      else if (lastRec) clSub.textContent = 'Last solved in ' + lastRec.moves + ' moves ' + '★'.repeat(lastRec.stars);
+      else clSub.textContent = 'Ready when you are';
+    }
+
+    var pbtn = document.getElementById('btnPrestige');
+    if (pbtn) {
+      if (canPrestige()) {
+        pbtn.classList.remove('hidden');
+        pbtn.textContent = '👑 Prestige → ×' + prestigeMultiplier().toFixed(1) + ' threads';
+      } else pbtn.classList.add('hidden');
+    }
+
+    var recent = document.getElementById('recentLevels');
+    if (recent) {
+      var startIdx = Math.max(0, cur - 14);
+      var tiles = [];
+      for (var i = startIdx; i <= cur; i++) {
+        var rec = st.levels[i];
+        var locked = i > cur;
+        var isCurrent = i === cur;
+        var stars = rec ? '★'.repeat(rec.stars) : '';
+        tiles.push(
+          '<button class="level-tile ' + (rec ? 'solved' : '') + ' ' + (isCurrent ? 'current' : '') +
+          ' ' + (locked ? 'opacity-40' : '') + '" data-level="' + i + '" ' +
+          (locked ? 'disabled' : '') + ' aria-label="Level ' + (i + 1) + '">' +
+          '<span class="text-sm leading-none">' + (locked ? '🔒' : (i + 1)) + '</span>' +
+          (stars ? '<span class="stars">' + stars + '</span>' : '') +
+          '</button>'
+        );
+      }
+      recent.innerHTML = tiles.join('');
+      var cells = recent.querySelectorAll('.level-tile');
+      for (var t = 0; t < cells.length; t++) {
+        cells[t].addEventListener('click', function (ev) {
+          var idx = parseInt(ev.currentTarget.getAttribute('data-level'), 10);
+          if (isNaN(idx) || ev.currentTarget.disabled) return;
+          buzz(10); startLevel(idx);
+        });
+      }
+    }
+
+    renderMissions();
+    renderSkins();
+    renderFeatureToggles();
+    renderThreadsPanel();
+  }
+
+  function renderMissions() {
+    ensureMissionsToday();
+    var m = app.store.missions;
+    var list = document.getElementById('missionsList');
+    if (!list) return;
+    var doneCount = 0;
+    list.innerHTML = m.ids.map(function (id) {
+      var def = null;
+      for (var i = 0; i < MISSIONS_POOL.length; i++) {
+        if (MISSIONS_POOL[i].id === id) { def = MISSIONS_POOL[i]; break; }
+      }
+      if (!def) return '';
+      var done = !!m.completed[id];
+      if (done) doneCount++;
+      return '<div class="mission-row ' + (done ? 'done' : '') + '">' +
+        '<div class="mission-check">' + (done ? '✓' : '') + '</div>' +
+        '<span class="mission-label text-[12px] font-bold text-ink-800">' +
+        def.icon + ' ' + def.label + '</span></div>';
+    }).join('');
+    var mp = document.getElementById('missionsProgress'); if (mp) mp.textContent = doneCount + '/3';
+    var bonusEl = document.getElementById('missionsBonus');
+    if (bonusEl) {
+      bonusEl.classList.remove('hidden');
+      if (m.bonusClaimed) {
+        bonusEl.textContent = '🎁 Bonus claimed! +3 🧵';
+        bonusEl.classList.remove('text-gold-600');
+        bonusEl.classList.add('text-emerald-600');
+      } else {
+        bonusEl.textContent = '🎁 Complete all 3 → +3 🧵';
+        bonusEl.classList.add('text-gold-600');
+        bonusEl.classList.remove('text-emerald-600');
+      }
+    }
+  }
+
+  function isSkinUnlocked(s) {
+    var st = app.store;
+    if (s.minPrestige) return st.prestige >= s.minPrestige;
+    if (s.at === 0) return true;
+    return st.unlocks.indexOf(s.id) >= 0;
+  }
+
+  function renderSkins() {
+    var st = app.store;
+    var row = document.getElementById('skinRow');
+    if (!row) return;
+    var ids = Object.keys(SKINS);
+    var unlockedCount = ids.filter(function (k) { return isSkinUnlocked(SKINS[k]); }).length;
+    var sc = document.getElementById('skinsCount'); if (sc) sc.textContent = unlockedCount + '/' + ids.length;
+    row.innerHTML = ids.map(function (k) {
+      var s = SKINS[k];
+      var unlocked = isSkinUnlocked(s);
+      var active = st.selectedSkin === s.id;
+      var lockBadge = '';
+      if (!unlocked) {
+        if (s.minPrestige) lockBadge = '<span class="lock-badge">👑</span>';
+        else lockBadge = '<span class="lock-badge">Lv' + s.at + '</span>';
+      }
+      return '<button class="skin-swatch ' + (active ? 'active' : '') + ' ' + (unlocked ? '' : 'locked') +
+        '" data-skin="' + s.id + '" ' + (unlocked ? '' : 'disabled') + ' aria-label="' + s.name + '">' +
+        '<div class="dot" style="background: radial-gradient(circle at 30% 30%, ' + s.from + ', ' + s.to + ')"></div>' +
+        lockBadge +
+        '</button>';
+    }).join('');
+    var swatches = row.querySelectorAll('.skin-swatch');
+    for (var i = 0; i < swatches.length; i++) {
+      swatches[i].addEventListener('click', function (ev) {
+        var id = ev.currentTarget.getAttribute('data-skin');
+        var skin = SKINS[id];
+        if (!skin || !isSkinUnlocked(skin)) return;
+        app.store.selectedSkin = id;
+        saveStore(); buzz(10);
+        beep(660, 0.06, 'sine', 0.05);
+        track('skin_selected', { id: id });
+        renderSkins();
+      });
+    }
+  }
+
+  function renderFeatureToggles() {
+    var st = app.store;
+    var wrap = document.getElementById('featureToggles');
+    if (!wrap) return;
+    var items = [];
+    items.push({ id: 'colorblind', label: '🎨 Colorblind mode', toggle: true, on: st.colorblind });
+    if (st.unlocks.indexOf('bestPreview') >= 0) {
+      items.push({ id: 'bestPreview', label: '📊 Best moves preview', text: 'On' });
+    }
+    if (st.unlocks.indexOf('shield') >= 0) {
+      items.push({ id: 'shield', label: '🛡️ Streak shields', text: st.streakShield + ' left' });
+    }
+    if (st.unlocks.indexOf('zen') >= 0) {
+      items.push({ id: 'zen', label: '🧘 Zen Mode (hide counter)', toggle: true, on: st.zenMode });
+    }
+    if (st.unlocks.indexOf('godfather') >= 0) {
+      items.push({ id: 'godfather', label: '🎩 Godfather Mode (2× 🧵)', toggle: true, on: st.godfatherMode });
+    }
+    wrap.classList.remove('hidden');
+    wrap.innerHTML = items.map(function (it) {
+      if (it.toggle) {
+        return '<div class="flex items-center justify-between gap-2">' +
+          '<span class="text-[12px] font-bold text-ink-800">' + it.label + '</span>' +
+          '<button data-toggle="' + it.id + '" aria-pressed="' + it.on + '" class="relative w-11 h-6 rounded-full transition-colors ' +
+          (it.on ? 'bg-teal-600' : 'bg-cream-300') + '">' +
+          '<span class="absolute top-0.5 ' + (it.on ? 'left-5' : 'left-0.5') +
+          ' w-5 h-5 rounded-full bg-white shadow transition-all"></span>' +
+          '</button></div>';
+      }
+      return '<div class="flex items-center justify-between gap-2">' +
+        '<span class="text-[12px] font-bold text-ink-800">' + it.label + '</span>' +
+        '<span class="text-[11px] font-extrabold text-ink-700/70">' + it.text + '</span></div>';
+    }).join('');
+    var btns = wrap.querySelectorAll('[data-toggle]');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].addEventListener('click', function (ev) {
+        var id = ev.currentTarget.getAttribute('data-toggle');
+        handleToggle(id);
+      });
+    }
+  }
+
+  function handleToggle(id) {
+    if (id === 'zen') {
+      app.store.zenMode = !app.store.zenMode;
+      saveStore(); buzz(10);
+      renderFeatureToggles(); updateHud();
+    }
+    if (id === 'colorblind') {
+      app.store.colorblind = !app.store.colorblind;
+      saveStore(); buzz(12);
+      track('colorblind_toggle', { on: app.store.colorblind, source: 'home' });
+      renderFeatureToggles();
+      toast(app.store.colorblind ? '🎨 Colorblind: ON — blue dashed knots' : '🎨 Colorblind: OFF — coral solid knots', 2000);
+      // Force immediate board re-render even if on game screen
+      if (app.nodes && app.edges) {
+        var sg = document.getElementById('screen-game');
+        if (sg && !sg.classList.contains('hidden')) {
+          render();
+          updateCbChip();
+        }
+      }
+    }
+    if (id === 'godfather') {
+      app.store.godfatherMode = !app.store.godfatherMode;
+      saveStore(); buzz(14);
+      track('godfather_toggle', { on: app.store.godfatherMode });
+      renderFeatureToggles();
+      if (app.store.godfatherMode) toast('🎩 You think you can handle it? Then handle it. 2× threads.', 3200);
+      else toast('Godfather Mode off.');
+    }
+  }
+
+  function renderThreadsPanel() {
+    var wrap = document.getElementById('featureToggles');
+    if (!wrap) return;
+    if (app.store.unlocks.indexOf('shield') < 0) return;
+    if (wrap.querySelector('[data-buyshield]')) return;
+    if (app.store.threads < 1) return;
+    var row = document.createElement('div');
+    row.setAttribute('data-buyshield', '1');
+    row.className = 'flex items-center justify-between gap-2 pt-1';
+    row.innerHTML =
+      '<span class="text-[11px] font-bold text-ink-700/70">Buy a shield</span>' +
+      '<button class="rounded-lg bg-white border-2 border-cream-300 px-2 py-1 text-[10px] font-extrabold text-ink-800">1 🧵</button>';
+    var btn = row.querySelector('button');
+    btn.addEventListener('click', function () {
+      if (app.store.threads < 1) { toast('Not enough threads 🧵'); return; }
+      app.store.threads -= 1;
+      app.store.streakShield += 1;
+      saveStore(); buzz(12);
+      track('shield_purchased');
+      renderHome();
+      toast('🛡️ Shield added — your next missed daily is protected.', 2600);
+    });
+    wrap.appendChild(row);
+  }
+
+  function tickCountdown() {
+    var els = document.querySelectorAll('.js-countdown');
+    for (var i = 0; i < els.length; i++) els[i].textContent = timeToMidnight();
+  }
+
+  /* ============================================================
+     PRESTIGE
+     ============================================================ */
+  function canPrestige() { return app.store.currentLevel >= 50; }
+  function showPrestigeConfirm() {
+    if (!canPrestige()) return;
+    var pb = document.getElementById('prestigeBefore'); if (pb) pb.textContent = '×' + prestigeMultiplier().toFixed(1);
+    var pa = document.getElementById('prestigeAfter'); if (pa) pa.textContent = '×' + (prestigeMultiplier() + 0.2).toFixed(1);
+    var po = document.getElementById('prestigeOverlay'); if (po) po.classList.remove('hidden');
+    buzz(12);
+  }
+  function closePrestigeConfirm() {
+    var po = document.getElementById('prestigeOverlay'); if (po) po.classList.add('hidden');
+  }
+  function doPrestige() {
+    if (!canPrestige()) return;
+    var st = app.store;
+    st.prestige += 1;
+    st.currentLevel = 0;
+    st.levels = {};
+    st.psr = 50;
+    st.mercyLevels = {};
+    st.bestStars = 0;
+    app.attemptCounts = {};
+    app.abandonCounts = {};
+    saveStore();
+    closePrestigeConfirm();
+    applyChapterTheme();
+    renderHome();
+    track('prestige', { level: st.prestige, multiplier: prestigeMultiplier() });
+    toast('👑 Prestige ' + st.prestige + '! Threads now ×' + prestigeMultiplier().toFixed(1) + '. New skin unlocked!', 4000);
+    beep(523, 0.12, 'triangle', 0.09);
+    setTimeout(function () { beep(784, 0.12, 'triangle', 0.09); }, 120);
+    setTimeout(function () { beep(1047, 0.24, 'triangle', 0.1); }, 240);
+    buzz([30, 50, 30, 50, 80]);
+  }
+
+  /* ============================================================
+     ACHIEVEMENTS OVERLAY
+     ============================================================ */
+  function renderAchievementsOverlay() {
+    var st = app.store;
+    var list = document.getElementById('achievementList');
+    if (!list) return;
+    var unlocked = 0;
+    list.innerHTML = ACHIEVEMENTS.map(function (a) {
+      var isUnlocked = !!st.achievements[a.id];
+      if (isUnlocked) unlocked++;
+      return '<div class="ach-row ' + (isUnlocked ? '' : 'locked') + '">' +
+        '<div class="ach-icon">' + a.icon + '</div>' +
+        '<div class="flex-1 min-w-0">' +
+        '<p class="ach-name text-[13px] font-extrabold text-ink-900 leading-tight">' + a.name + '</p>' +
+        '<p class="ach-desc text-[11px] font-bold text-ink-700/70 leading-tight">' + a.desc + '</p>' +
+        '</div>' +
+        (isUnlocked ? '<span class="text-gold-500 text-lg">✓</span>' : '') +
+        '</div>';
+    }).join('');
+    var ac = document.getElementById('achCount'); if (ac) ac.textContent = unlocked + ' / ' + ACHIEVEMENTS.length + ' unlocked';
+  }
+  function openAchievements() {
+    var co = document.getElementById('completeOverlay'); if (co) co.classList.add('hidden');
+    renderAchievementsOverlay();
+    var ao = document.getElementById('achievementOverlay'); if (ao) ao.classList.remove('hidden');
+    buzz(10);
+  }
+  function closeAchievements() {
+    var ao = document.getElementById('achievementOverlay'); if (ao) ao.classList.add('hidden');
+  }
+
+  /* ============================================================
+     GAME START
+     ============================================================ */
+  function startLevel(index) {
+    app.mode = 'level';
+    app.levelIndex = index;
+    app.attemptCounts[index] = (app.attemptCounts[index] || 0) + 1;
+    app.hadNewCrossing = false;
+    var cfg = ddaLevelConfig(index);
+    var seed = (index + 1) * 7919 + dayIndex() * 3 +
+               (app.store.mercyLevels[index] ? 5000 : 0) +
+               (app.store.tutorialDone ? 0 : 9001) +
+               app.attemptCounts[index] * 131;
+    var puzzle = generateWithRetry(seed, cfg.nodes, cfg.edges);
+    app.nodes = puzzle.nodes.map(function (n) { return { x: n.x, y: n.y }; });
+    app.edges = puzzle.edges.map(function (e) { return e.slice(); });
+    app.moveCount = 0; app.solved = false;
+    app.hintNode = -1; app.hintUsedThisPlay = false;
+    app.levelStartTime = Date.now();
+    var gl = document.getElementById('gameLabel'); if (gl) gl.textContent = 'Level ' + (index + 1);
+    launchGame();
+    track('level_start', { index: index, nodes: cfg.nodes, edges: cfg.edges });
+  }
+
+  function startDaily() {
+    if (app.store.dailyDone[app.todayDate]) { toast('Already untangled today ☕'); return; }
+    app.mode = 'daily';
+    app.hadNewCrossing = false;
+    var cfg = dailyConfig();
+    var puzzle = generateWithRetry(dailySeed() * 13 + 3, cfg.nodes, cfg.edges);
+    app.nodes = puzzle.nodes.map(function (n) { return { x: n.x, y: n.y }; });
+    app.edges = puzzle.edges.map(function (e) { return e.slice(); });
+    app.moveCount = 0; app.solved = false;
+    app.hintNode = -1; app.hintUsedThisPlay = false;
+    app.levelStartTime = Date.now();
+    var gl = document.getElementById('gameLabel'); if (gl) gl.textContent = 'Daily Knot';
+    launchGame();
+    track('daily_start');
+  }
+
+  function updateCbChip() {
+    var chip = document.getElementById('cbChip');
+    if (chip) chip.classList.toggle('hidden', !app.store.colorblind);
+  }
+
+  function launchGame() {
+    var co = document.getElementById('completeOverlay'); if (co) co.classList.add('hidden');
+    var mb = document.getElementById('mercyBanner'); if (mb) mb.classList.add('hidden');
+    var md = document.getElementById('movesDisplay'); if (md) md.textContent = '0 moves';
+    var bd = document.getElementById('bestDisplay'); if (bd) bd.textContent = '';
+    applyChapterTheme();
+    app.crossings = computeCrossings(app.nodes, app.edges);
+    app.initialCrossings = app.crossings.count;
+    if (app.mode === 'level' && app.store.unlocks.indexOf('bestPreview') >= 0) {
+      var rec = app.store.levels[app.levelIndex];
+      if (rec && bd) bd.textContent = 'Best: ' + rec.moves;
+    }
+    updateHintButton();
+    updateSoftenButton();
+    updateCbChip();
+    render();
+    updateProgressBar();
+    showScreen('game');
+    var tut = document.getElementById('tutorialOverlay');
+    if (tut) {
+      if (app.mode === 'level' && app.levelIndex === 0 && !app.store.tutorialDone) {
+        tut.classList.remove('hidden');
+        track('tutorial_shown');
+      } else tut.classList.add('hidden');
+    }
+    if (app.mercyTimer) clearInterval(app.mercyTimer);
+    app.mercyTimer = setInterval(checkMercy, 3000);
+    if (app.mode === 'level' && app.attemptCounts[app.levelIndex] >= 3 && !app.store.mercyLevels[app.levelIndex]) {
+      showMercyBanner();
+    }
+  }
+
+  function updateHintButton() {
+    var btn = document.getElementById('btnHint');
+    if (!btn) return;
+    var used = app.mode === 'level' ? app.hintUsedThisPlay : !!app.store.hintsUsed['D' + app.todayDate];
+    if (used || app.solved) {
+      btn.classList.add('opacity-40'); btn.textContent = '✓'; btn.disabled = true;
+    } else {
+      btn.classList.remove('opacity-40'); btn.textContent = '💡'; btn.disabled = false;
+    }
+  }
+  function updateSoftenButton() {
+    var btn = document.getElementById('btnSoften');
+    if (!btn) return;
+    var already = app.mode === 'level' && app.store.mercyLevels[app.levelIndex];
+    if (app.solved || already) {
+      btn.disabled = true; btn.classList.add('opacity-50');
+      btn.textContent = '🕊️ —';
+      return;
+    }
+    btn.disabled = app.store.threads < 2;
+    btn.classList.toggle('opacity-50', app.store.threads < 2);
+    btn.textContent = '🕊️ 2 🧵';
+  }
+
+  /* ============================================================
+     RENDER BOARD — COLORBLIND FIX
+     ============================================================ */
+  var svg = document.getElementById('board');
+
+  function edgeHotColor() {
+    return app.store.colorblind ? '#2563EB' : '#F43F5E';
+  }
+  function edgeHotWidth() {
+    return app.store.colorblind ? '2.5' : '1.6';
+  }
+  function edgeHotDashAttr() {
+    return app.store.colorblind ? ' stroke-dasharray="5,3"' : '';
+  }
+
+  function render() {
+    if (!svg) return;
+    var c = app.crossings;
+    var skin = currentSkin();
+    var chapter = chapterForLevel(app.store.currentLevel);
+    var hotEdges = {};
+    c.pairs.forEach(function (p) { hotEdges[p[0]] = 1; hotEdges[p[1]] = 1; });
+    var hotColor = edgeHotColor();
+    var hotWidth = edgeHotWidth();
+    var hotDash = edgeHotDashAttr();
+
+    var body = '';
+    for (var i = 0; i < app.edges.length; i++) {
+      var a = app.edges[i][0], b = app.edges[i][1];
+      var hot = !!hotEdges[i];
+      body += '<line data-edge="' + i + '" ' +
+        'x1="' + app.nodes[a].x + '" y1="' + app.nodes[a].y + '" ' +
+        'x2="' + app.nodes[b].x + '" y2="' + app.nodes[b].y + '" ' +
+        'stroke="' + (hot ? hotColor : '#F59E0B') + '" ' +
+        'stroke-width="' + (hot ? hotWidth : '1.3') + '" ' +
+        'stroke-linecap="round" ' +
+        (hot ? hotDash : '') + ' ' +
+        'class="' + (hot ? 'edge-crossing' : '') + '" ' +
+        (hot ? 'filter="url(#glow)"' : '') + ' />';
+    }
+    body += '<g id="crossingsLayer">';
+    c.points.forEach(function (pt) {
+      body += '<circle cx="' + pt.x + '" cy="' + pt.y + '" r="2.5" fill="#FFFFFF" stroke="' + hotColor + '" stroke-width="' + (app.store.colorblind ? '1.4' : '0.9') + '" class="crossing-dot" />';
+    });
+    body += '</g>';
+
+    for (var n = 0; n < app.nodes.length; n++) {
+      var node = app.nodes[n];
+      var dragging = app.dragState && app.dragState.id === n;
+      var hinted = app.hintNode === n;
+      var r = dragging ? 5.2 : 4.2;
+      body += '<g class="node" data-node-id="' + n + '">' +
+        '<circle cx="' + node.x + '" cy="' + node.y + '" r="' + (r + 4) + '" fill="transparent" class="hitbox" />' +
+        (hinted ? '<circle class="hint-ring" cx="' + node.x + '" cy="' + node.y + '" r="' + r + '" fill="none" stroke="#F59E0B" stroke-width="1.4" />' : '') +
+        '<circle class="main-circle" cx="' + node.x + '" cy="' + node.y + '" r="' + r + '" fill="url(#nodeGrad)" stroke="' + skin.edge + '" stroke-width="0.5" />' +
+        '<circle class="shine-circle" cx="' + node.x + '" cy="' + node.y + '" r="' + (r * 0.42) + '" fill="rgba(255,255,255,0.28)" />' +
+        '</g>';
+    }
+
+    svg.innerHTML =
+      '<defs>' +
+      '<radialGradient id="nodeGrad" cx="35%" cy="30%" r="70%">' +
+      '<stop offset="0%" stop-color="' + skin.from + '" />' +
+      '<stop offset="70%" stop-color="' + skin.to + '" />' +
+      '<stop offset="100%" stop-color="' + skin.edge + '" />' +
+      '</radialGradient>' +
+      '<filter id="glow" x="-50%" y="-50%" width="200%" height="200%">' +
+      '<feGaussianBlur stdDeviation="1.1" result="b" />' +
+      '<feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>' +
+      '</filter>' +
+      '<pattern id="dots" width="8" height="8" patternUnits="userSpaceOnUse">' +
+      '<circle cx="4" cy="4" r="0.35" fill="' + chapter.dot + '" />' +
+      '</pattern>' +
+      '</defs>' +
+      '<rect x="0" y="0" width="100" height="100" fill="url(#dots)" />' +
+      body;
+
+    updateHud();
+  }
+
+  function updateHud() {
+    var cc = document.getElementById('crossingsCount');
+    if (cc) cc.textContent = app.store.zenMode ? '—' : app.crossings.count;
+    var md = document.getElementById('movesDisplay');
+    if (md) md.textContent = app.moveCount + (app.moveCount === 1 ? ' move' : ' moves');
+  }
+  function updateProgressBar() {
+    var init = Math.max(app.initialCrossings, 1);
+    var done = Math.max(0, init - app.crossings.count);
+    var pct = Math.min(100, (done / init) * 100);
+    var pb = document.getElementById('progressBar'); if (pb) pb.style.width = pct + '%';
+    var pl = document.getElementById('progressLabel'); if (pl) pl.textContent = done + '/' + init;
+  }
+
+  function updateDraggedVisual() {
+    if (!app.dragState || !svg) return;
+    var id = app.dragState.id;
+    var node = app.nodes[id];
+    var g = svg.querySelector('[data-node-id="' + id + '"]');
+    if (g) {
+      var circles = g.querySelectorAll('circle');
+      for (var i = 0; i < circles.length; i++) {
+        circles[i].setAttribute('cx', node.x);
+        circles[i].setAttribute('cy', node.y);
+      }
+    }
+    for (var e = 0; e < app.edges.length; e++) {
+      var a = app.edges[e][0], b = app.edges[e][1];
+      if (a !== id && b !== id) continue;
+      var line = svg.querySelector('line[data-edge="' + e + '"]');
+      if (!line) continue;
+      line.setAttribute('x1', app.nodes[a].x);
+      line.setAttribute('y1', app.nodes[a].y);
+      line.setAttribute('x2', app.nodes[b].x);
+      line.setAttribute('y2', app.nodes[b].y);
+    }
+    var newC = computeCrossings(app.nodes, app.edges);
+    if (newC.count !== app.crossings.count || newC.pairs.length !== app.crossings.pairs.length) {
+      var prev = app.crossings.count;
+      app.crossings = newC;
+      applyHighlights(newC);
+      updateHud();
+      updateProgressBar();
+      if (newC.count < prev) {
+        softBeep(880); buzz(4);
+        if (newC.count === 1 && prev > 1) toast('Almost! 1 crossing left 🎯');
+        else if (newC.count === 2 && prev > 2) toast('Two knots left 💪');
+      } else if (newC.count > prev) {
+        softBeep(220);
+        app.hadNewCrossing = true;
+      }
+    }
+  }
+
+  function applyHighlights(c) {
+    if (!svg) return;
+    var hot = {};
+    c.pairs.forEach(function (p) { hot[p[0]] = 1; hot[p[1]] = 1; });
+    var hotColor = edgeHotColor();
+    var hotWidth = edgeHotWidth();
+    var cb = app.store.colorblind;
+    for (var i = 0; i < app.edges.length; i++) {
+      var line = svg.querySelector('line[data-edge="' + i + '"]');
+      if (!line) continue;
+      if (hot[i]) {
+        line.setAttribute('stroke', hotColor);
+        line.setAttribute('stroke-width', hotWidth);
+        line.setAttribute('filter', 'url(#glow)');
+        line.classList.add('edge-crossing');
+        if (cb) line.setAttribute('stroke-dasharray', '5,3');
+        else line.removeAttribute('stroke-dasharray');
+      } else {
+        line.setAttribute('stroke', '#F59E0B');
+        line.setAttribute('stroke-width', '1.3');
+        line.removeAttribute('filter');
+        line.removeAttribute('stroke-dasharray');
+        line.classList.remove('edge-crossing');
+      }
+    }
+    var layer = svg.querySelector('#crossingsLayer');
+    if (layer) {
+      layer.innerHTML = c.points.map(function (pt) {
+        return '<circle cx="' + pt.x + '" cy="' + pt.y + '" r="2.5" fill="#FFFFFF" stroke="' + hotColor + '" stroke-width="' + (cb ? '1.4' : '0.9') + '" class="crossing-dot" />';
+      }).join('');
+    }
+  }
+
+  /* ============================================================
+     POINTER
+     ============================================================ */
+  function svgPoint(e) {
+    var pt = new DOMPoint(e.clientX, e.clientY);
+    var m = svg.getScreenCTM();
+    if (!m) return { x: 0, y: 0 };
+    var p = pt.matrixTransform(m.inverse());
+    return { x: p.x, y: p.y };
+  }
+  function findNodeAt(pt) {
+    var best = -1, bestD = Infinity;
+    for (var i = 0; i < app.nodes.length; i++) {
+      var d = Math.hypot(app.nodes[i].x - pt.x, app.nodes[i].y - pt.y);
+      if (d < 9 && d < bestD) { best = i; bestD = d; }
+    }
+    return best;
+  }
+
+  if (svg) {
+    svg.addEventListener('pointerdown', function (e) {
+      if (app.solved) return;
+      getAudio();
+      var pt = svgPoint(e);
+      var idx = findNodeAt(pt);
+      if (idx < 0) return;
+      e.preventDefault();
+      app.dragState = {
+        id: idx,
+        offsetX: app.nodes[idx].x - pt.x,
+        offsetY: app.nodes[idx].y - pt.y,
+        startX: app.nodes[idx].x, startY: app.nodes[idx].y,
+        moved: false
+      };
+      app.dragStartCrossings = app.crossings.count;
+      var g = svg.querySelector('[data-node-id="' + idx + '"]');
+      if (g) { var mc = g.querySelector('.main-circle'); if (mc) mc.setAttribute('r', '5.2'); }
+      try { svg.setPointerCapture(e.pointerId); } catch (err) {}
+      beep(523, 0.04, 'sine', 0.05);
+      buzz(8);
+    });
+    svg.addEventListener('pointermove', function (e) {
+      if (!app.dragState) return;
+      e.preventDefault();
+      var pt = svgPoint(e);
+      var node = app.nodes[app.dragState.id];
+      node.x = Math.max(6, Math.min(94, pt.x + app.dragState.offsetX));
+      node.y = Math.max(6, Math.min(94, pt.y + app.dragState.offsetY));
+      if (Math.hypot(node.x - app.dragState.startX, node.y - app.dragState.startY) > 1.2) {
+        app.dragState.moved = true;
+      }
+      updateDraggedVisual();
+    });
+    svg.addEventListener('pointerup', function () {
+      if (!app.dragState) return;
+      var moved = app.dragState.moved;
+      var resolved = app.dragStartCrossings - app.crossings.count;
+      app.dragState = null;
+      if (!moved) { render(); return; }
+      if (!app.store.tutorialDone && app.mode === 'level' && app.levelIndex === 0) {
+        app.store.tutorialDone = true;
+        saveStore();
+        var tut = document.getElementById('tutorialOverlay'); if (tut) tut.classList.add('hidden');
+        track('tutorial_completed');
+        toast("That's the trick! 🎉", 2000);
+      }
+      app.moveCount++;
+      if (resolved >= 2) {
+        showCombo(resolved);
+        beep(1047, 0.14, 'triangle', 0.09);
+        buzz([12, 20, 12]);
+        updateMissionProgress('comboAchieved', 1);
+      } else if (resolved === 1) beep(784, 0.06, 'sine', 0.05);
+      render();
+      updateProgressBar();
+      if (app.crossings.count === 0 && !app.solved) solveLevel();
+    });
+    svg.addEventListener('pointercancel', function () {
+      if (app.dragState) { app.dragState = null; render(); }
+    });
+  }
+
+  /* ============================================================
+     COMBO / CONFETTI
+     ============================================================ */
+  function showCombo(n) {
+    var wrap = document.getElementById('boardWrap');
+    if (!wrap) return;
+    var el = document.createElement('div');
+    el.className = 'combo-pop';
+    el.textContent = n >= 3 ? 'TRIPLE KNOT!' : 'DOUBLE KNOT!';
+    el.style.left = '50%'; el.style.top = '50%';
+    wrap.appendChild(el);
+    setTimeout(function () { el.remove(); }, 1000);
+  }
+  function confettiBurst() {
+    var wrap = document.getElementById('boardWrap');
+    if (!wrap) return;
+    var colors = ['#F59E0B', '#F43F5E', '#0F766E', '#FBBF24', '#A855F7', '#14B8A6'];
+    for (var i = 0; i < 26; i++) {
+      var p = document.createElement('div');
+      p.className = 'confetti';
+      var angle = Math.random() * Math.PI * 2;
+      var dist = 90 + Math.random() * 140;
+      p.style.left = '50%'; p.style.top = '50%';
+      p.style.background = colors[Math.floor(Math.random() * colors.length)];
+      p.style.setProperty('--dx', (Math.cos(angle) * dist) + 'px');
+      p.style.setProperty('--dy', (Math.sin(angle) * dist) + 'px');
+      wrap.appendChild(p);
+      (function (el) { setTimeout(function () { el.remove(); }, 1100); })(p);
+    }
+  }
+
+  /* ============================================================
+     SOLVE
+     ============================================================ */
+  function solveLevel() {
+    app.solved = true;
+    if (app.mercyTimer) { clearInterval(app.mercyTimer); app.mercyTimer = null; }
+    var par = Math.max(2, Math.ceil(app.edges.length / 3));
+    var stars = 1;
+    if (app.moveCount <= par) stars = 3;
+    else if (app.moveCount <= par + 2) stars = 2;
+    var st = app.store;
+    var oldChapter = chapterForLevel(st.currentLevel);
+    updatePSR(stars, app.moveCount, par);
+    var earnedThreads = 1;
+    if (stars === 3) earnedThreads += 1;
+    if (app.mode === 'daily') earnedThreads = 2;
+    if (st.godfatherMode && st.unlocks.indexOf('godfather') >= 0) earnedThreads *= 2;
+    earnedThreads = Math.round(earnedThreads * prestigeMultiplier());
+    if (app.mode === 'level') {
+      var key = String(app.levelIndex);
+      var prev = st.levels[key];
+      if (!prev || stars > prev.stars || (stars === prev.stars && app.moveCount < prev.moves)) {
+        st.levels[key] = { stars: stars, moves: app.moveCount };
+      }
+      if (app.levelIndex >= st.currentLevel) st.currentLevel = app.levelIndex + 1;
+      if (stars > st.bestStars) st.bestStars = stars;
+      app.attemptCounts[app.levelIndex] = 0;
+    } else {
+      if (!st.dailyDone[app.todayDate]) {
+        st.dailyDone[app.todayDate] = { moves: app.moveCount };
+        var yest = shiftKey(app.todayDate, -1);
+        if (st.lastDailyDate === yest) st.dailyStreak++;
+        else if (st.lastDailyDate !== app.todayDate) {
+          if (st.lastDailyDate !== null && st.streakShield > 0) {
+            st.streakShield--;
+            st.dailyStreak++;
+            setTimeout(function () { toast('🛡️ Streak Shield used! Your streak is safe.', 2800); }, 800);
+          } else st.dailyStreak = 1;
+        }
+        st.lastDailyDate = app.todayDate;
+      }
+    }
+    st.totalMoves += app.moveCount;
+    st.totalSolved++;
+    app.sessionStreak = (app.sessionStreak || 0) + 1;
+    var newlyUnlocked = checkUnlocks();
+    var newChapter = chapterForLevel(st.currentLevel);
+    var chapterCelebration = (app.mode === 'level' && newChapter.id !== oldChapter.id) ? newChapter : null;
+    if (app.mode === 'level') {
+      updateMissionProgress('levelSolves', 1);
+      if (stars === 3) updateMissionProgress('threeStar', 1);
+      if (!app.hintUsedThisPlay) updateMissionProgress('noHintSolves', 1);
+      if (app.moveCount === par) updateMissionProgress('parSolves', 1);
+    }
+    if (app.mode === 'daily') updateMissionProgress('dailyPlayed', 1);
+    if (earnedThreads > 0) updateMissionProgress('threadsEarned', earnedThreads);
+    addThreads(earnedThreads);
+    saveStore();
+    checkAchievements({
+      moves: app.moveCount, par: par, stars: stars, mode: app.mode,
+      godfather: st.godfatherMode && st.unlocks.indexOf('godfather') >= 0,
+      hadNewCrossing: app.hadNewCrossing
+    });
+    setTimeout(function () { beep(523, 0.12, 'triangle', 0.08); }, 0);
+    setTimeout(function () { beep(659, 0.12, 'triangle', 0.08); }, 100);
+    setTimeout(function () { beep(784, 0.22, 'triangle', 0.1); }, 200);
+    buzz([25, 40, 25, 40, 60]);
+    if (stars === 3) setTimeout(confettiBurst, 250);
+    if (chapterCelebration) {
+      setTimeout(function () { beep(1047, 0.2, 'triangle', 0.12); }, 400);
+      setTimeout(confettiBurst, 500);
+      applyChapterTheme();
+    }
+    track(app.mode === 'daily' ? 'daily_complete' : 'level_complete', {
+      index: app.levelIndex, moves: app.moveCount, par: par, stars: stars,
+      psr: Math.round(st.psr), prestige: st.prestige
+    });
+    setTimeout(function () {
+      showCompleteOverlay(stars, par, earnedThreads, newlyUnlocked, chapterCelebration);
+    }, 480);
+  }
+
+  function checkUnlocks() {
+    var st = app.store;
+    var newly = [];
+    UNLOCKS.forEach(function (u) {
+      if (st.currentLevel >= u.level && st.unlocks.indexOf(u.id) < 0) {
+        st.unlocks.push(u.id);
+        newly.push(u);
+        if (u.id === 'shield') st.streakShield += 1;
+        track('unlock', { id: u.id, level: u.level });
+      }
+    });
+    return newly;
+  }
+
+  function showCompleteOverlay(stars, par, earnedThreads, newlyUnlocked, chapterCelebration) {
+    var overlay = document.getElementById('completeOverlay');
+    if (!overlay) return;
+    var ct = document.getElementById('completeTitle');
+    if (ct) ct.textContent = app.mode === 'daily' ? 'Daily Knot Cleared!' : 'Untangled!';
+    var cm = document.getElementById('completeMoves');
+    if (cm) cm.textContent = 'in ' + app.moveCount + ' ' + (app.moveCount === 1 ? 'move' : 'moves') + (par ? ' (par ' + par + ')' : '');
+    var starsWrap = document.getElementById('completeStars');
+    if (starsWrap) {
+      starsWrap.innerHTML = '';
+      for (var i = 0; i < 3; i++) {
+        var s = document.createElement('span');
+        s.className = 'star-big' + (i < stars ? '' : ' dim');
+        s.textContent = '★';
+        s.style.color = i < stars ? '#F59E0B' : '#E8CFA8';
+        starsWrap.appendChild(s);
+      }
+    }
+    var threadsEl = document.getElementById('threadsEarned');
+    if (threadsEl) {
+      threadsEl.textContent = '+' + earnedThreads + ' 🧵 earned';
+      threadsEl.classList.remove('hidden');
+    }
+    var chapterBanner = document.getElementById('chapterBanner');
+    var milestoneBanner = document.getElementById('milestoneBanner');
+    if (chapterBanner && milestoneBanner) {
+      if (chapterCelebration) {
+        var chIdx = CHAPTERS.indexOf(chapterCelebration) + 1;
+        chapterBanner.classList.remove('hidden');
+        var cbTitle = document.querySelector('#chapterBanner .cb-title');
+        if (cbTitle) cbTitle.textContent = 'Chapter ' + chIdx + ' Unlocked';
+        var cbName = document.getElementById('chapterBannerName');
+        if (cbName) cbName.textContent = chapterCelebration.emoji + ' ' + chapterCelebration.name;
+        milestoneBanner.classList.add('hidden');
+      } else {
+        chapterBanner.classList.add('hidden');
+        var isMilestone = app.mode === 'level' && (app.levelIndex + 1) % 5 === 0;
+        if (isMilestone) {
+          milestoneBanner.classList.remove('hidden');
+          milestoneBanner.textContent = '🎉 ' + (app.levelIndex + 1) + ' LEVELS CLEARED!';
+        } else milestoneBanner.classList.add('hidden');
+      }
+    }
+    var sessionLine = document.getElementById('sessionLine');
+    if (sessionLine) {
+      if (app.mode === 'level' && app.sessionStreak >= 2) {
+        sessionLine.classList.remove('hidden');
+        sessionLine.textContent = '🔥 ' + app.sessionStreak + ' levels in a row';
+      } else sessionLine.classList.add('hidden');
+    }
+    var unlockLine = document.getElementById('unlockLine');
+    if (unlockLine) {
+      if (newlyUnlocked && newlyUnlocked.length > 0) {
+        var u = newlyUnlocked[0];
+        unlockLine.classList.remove('hidden');
+        unlockLine.textContent = u.icon + ' UNLOCKED: ' + u.name;
+      } else unlockLine.classList.add('hidden');
+    }
+    var nextBtn = document.getElementById('btnNext');
+    if (nextBtn) nextBtn.textContent = app.mode === 'daily' ? 'Back to Home' : 'Next Level →';
+    overlay.classList.remove('hidden');
+    var card = overlay.querySelector('.complete-card');
+    if (card) { card.style.animation = 'none'; void card.offsetWidth; card.style.animation = ''; }
+  }
+
+  /* ============================================================
+     SHARE
+     ============================================================ */
+  function buildShareText() {
+    var label = app.mode === 'daily' ? "today's Daily Knot" : 'Level ' + (app.levelIndex + 1);
+    var stars = app.mode === 'level' && app.store.levels[app.levelIndex] ? app.store.levels[app.levelIndex].stars : 0;
+    var starStr = stars ? ' ' + '★'.repeat(stars) : '';
+    var prestigeStr = app.store.prestige > 0 ? ' (Prestige ' + app.store.prestige + ')' : '';
+    return [
+      '🧵 Untangle', '',
+      'I untangled ' + label + ' in ' + app.moveCount + ' ' + (app.moveCount === 1 ? 'move' : 'moves') + starStr + prestigeStr,
+      '🔥 Daily streak: ' + app.store.dailyStreak, '',
+      'Can you untangle it faster?'
+    ].join('\n');
+  }
+  async function shareResult() {
+    var text = buildShareText();
+    track('share_attempt');
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'Untangle', text: text });
+        buzz(20); track('share_success', { via: 'native' }); return;
+      } catch (e) { if (e && e.name === 'AbortError') return; }
+    }
+    window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+    track('share_success', { via: 'whatsapp' });
+  }
+
+  /* ============================================================
+     HINT
+     ============================================================ */
+  async function requestHint() {
+    if (app.solved || app.crossings.count === 0) return;
+    if (app.mode === 'daily' && app.store.hintsUsed['D' + app.todayDate]) { toast('Hint already used for today'); return; }
+    if (app.mode === 'level' && app.hintUsedThisPlay) { toast('Hint already used this playthrough'); return; }
+    var btn = document.getElementById('btnHint');
+    if (btn) { btn.disabled = true; btn.textContent = '…'; }
+    var granted = await showRewardedAd();
+    if (!granted) {
+      if (btn) { btn.disabled = false; btn.textContent = '💡'; }
+      toast('No ad available right now'); return;
+    }
+    if (app.mode === 'daily') {
+      app.store.hintsUsed['D' + app.todayDate] = true;
+      saveStore();
+    }
+    app.hintUsedThisPlay = true;
+    track('hint_used', { mode: app.mode });
+    var edgeCounts = {};
+    app.crossings.pairs.forEach(function (p) {
+      edgeCounts[p[0]] = (edgeCounts[p[0]] || 0) + 1;
+      edgeCounts[p[1]] = (edgeCounts[p[1]] || 0) + 1;
+    });
+    var nodeScores = new Array(app.nodes.length).fill(0);
+    app.edges.forEach(function (e, idx) {
+      var c = edgeCounts[idx] || 0;
+      nodeScores[e[0]] += c; nodeScores[e[1]] += c;
+    });
+    var best = 0;
+    for (var i = 1; i < nodeScores.length; i++) if (nodeScores[i] > nodeScores[best]) best = i;
+    app.hintNode = best;
+    render();
+    toast('Try moving the glowing node 💡');
+    setTimeout(function () { app.hintNode = -1; render(); }, 4500);
+    updateHintButton();
+  }
+
+  /* ============================================================
+     MERCY
+     ============================================================ */
+  function checkMercy() {
+    if (app.solved || app.mode !== 'level') return;
+    if (app.store.mercyLevels[app.levelIndex]) return;
+    var mb = document.getElementById('mercyBanner');
+    if (!mb || !mb.classList.contains('hidden')) return;
+    var elapsed = (Date.now() - app.levelStartTime) / 1000;
+    var struggling = elapsed > 90 && app.moveCount >= 8 && app.store.psr < 55;
+    var restartedTooMuch = app.attemptCounts[app.levelIndex] >= 3;
+    if (struggling || restartedTooMuch) showMercyBanner();
+  }
+  function showMercyBanner() {
+    var mb = document.getElementById('mercyBanner'); if (mb) mb.classList.remove('hidden');
+    track('mercy_shown', { index: app.levelIndex });
+  }
+  function acceptMercy() {
+    if (app.mode !== 'level') return;
+    app.store.mercyLevels[app.levelIndex] = true;
+    saveStore(); buzz([20, 40, 20]);
+    beep(660, 0.1, 'sine', 0.06);
+    toast('🕊️ Softer knots. No shame.', 2400);
+    track('mercy_accepted', { index: app.levelIndex });
+    startLevel(app.levelIndex);
+  }
+  function dismissMercy() {
+    var mb = document.getElementById('mercyBanner'); if (mb) mb.classList.add('hidden');
+    track('mercy_dismissed', { index: app.levelIndex });
+  }
+  function softenLevel() {
+    if (app.solved || app.mode !== 'level') return;
+    if (app.store.mercyLevels[app.levelIndex]) return;
+    if (app.store.threads < 2) { toast('Need 2 🧵 to soften. Solve a level first.'); return; }
+    app.store.threads -= 2;
+    app.store.mercyLevels[app.levelIndex] = true;
+    saveStore(); buzz([15, 30, 15]);
+    beep(660, 0.1, 'sine', 0.06);
+    toast('🕊️ Softened. Here we go again.', 2200);
+    track('soften_manual', { index: app.levelIndex });
+    startLevel(app.levelIndex);
+  }
+
+  /* ============================================================
+     NAVIGATION
+     ============================================================ */
+  function nextLevelOrHome() {
+    var co = document.getElementById('completeOverlay'); if (co) co.classList.add('hidden');
+    if (app.mode === 'daily') { app.sessionStreak = 0; renderHome(); showScreen('home'); return; }
+    if ((app.levelIndex + 1) % 3 === 0) showInterstitialAd();
+    startLevel(app.levelIndex + 1);
+  }
+  function goHome() {
+    var co = document.getElementById('completeOverlay'); if (co) co.classList.add('hidden');
+    if (app.mercyTimer) { clearInterval(app.mercyTimer); app.mercyTimer = null; }
+    app.sessionStreak = 0;
+    renderHome();
+    showScreen('home');
+  }
+  function backFromGame() {
+    if (!app.solved && app.mode === 'level') {
+      app.abandonCounts[app.levelIndex] = (app.abandonCounts[app.levelIndex] || 0) + 1;
+      if (app.abandonCounts[app.levelIndex] >= 2) {
+        app.attemptCounts[app.levelIndex] = Math.max(app.attemptCounts[app.levelIndex], 3);
+      }
+      track('level_abandon', { index: app.levelIndex, moves: app.moveCount });
+    }
+    goHome();
+  }
+
+  /* ============================================================
+     EVENT BINDINGS
+     ============================================================ */
+  function bind() {
+    function on(id, fn) {
+      var el = document.getElementById(id);
+      if (el) el.addEventListener('click', fn);
+    }
+    on('btnDaily', function () { buzz(12); startDaily(); });
+    on('btnContinue', function () { buzz(12); startLevel(app.store.currentLevel); });
+    on('btnPrestige', showPrestigeConfirm);
+    on('btnPrestigeYes', doPrestige);
+    on('btnPrestigeNo', function () { buzz(8); closePrestigeConfirm(); });
+    on('btnBack', function () { buzz(10); backFromGame(); });
+    on('btnHint', function () { buzz(10); requestHint(); });
+    on('btnSoften', function () { buzz(10); softenLevel(); });
+    on('btnMercy', acceptMercy);
+    on('btnMercyNo', dismissMercy);
+    on('btnNext', function () { buzz(12); nextLevelOrHome(); });
+    on('btnShare', function () { buzz(12); shareResult(); });
+    on('btnHome', function () { buzz(10); goHome(); });
+    on('btnAch', openAchievements);
+    on('btnAchClose', function () { buzz(8); closeAchievements(); });
+
+    // In-game colorblind toggle
+    on('btnCB', function () {
+      app.store.colorblind = !app.store.colorblind;
+      saveStore(); buzz(10);
+      track('colorblind_toggle', { on: app.store.colorblind, source: 'game' });
+      updateCbChip();
+      render();
+      renderFeatureToggles();
+      toast(app.store.colorblind ? '🎨 Colorblind: ON — blue dashed knots' : '🎨 Colorblind: OFF — coral solid knots', 1800);
+    });
+
+    on('btnMute', function () {
+      app.store.soundOn = !app.store.soundOn;
+      saveStore();
+      var bm = document.getElementById('btnMute');
+      if (bm) bm.textContent = app.store.soundOn ? '🔊' : '🔇';
+      if (app.store.soundOn) beep(660, 0.08, 'sine', 0.06);
+    });
+
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState !== 'visible') return;
+      var now = dateKey();
+      if (now !== app.todayDate) {
+        app.todayDate = now;
+        ensureMissionsToday();
+        renderHome();
+        var sh = document.getElementById('screen-home');
+        if (sh && !sh.classList.contains('hidden')) toast('A fresh Daily Knot is ready 🧵');
+        track('date_rollover');
+      }
+    });
+  }
+
+  /* ============================================================
+     PWA SETUP (manifest via blob + install prompt)
+     ============================================================ */
+  var deferredInstallPrompt = null;
+  function setupPWA() {
+    // Inline manifest via data URI (works in most browsers for basic PWA)
+    try {
+      var manifest = {
+        name: 'Untangle',
+        short_name: 'Untangle',
+        description: 'A cosy daily knot puzzle. Drag nodes. Remove crossings. Chase streaks.',
+        start_url: '.',
+        scope: '.',
+        display: 'standalone',
+        orientation: 'portrait',
+        background_color: '#FAF3E8',
+        theme_color: '#C2410C',
+        categories: ['games', 'puzzle'],
+        icons: [{
+          src: 'data:image/svg+xml;utf8,' + encodeURIComponent(
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">' +
+            '<rect width="192" height="192" rx="42" fill="#FAF3E8"/>' +
+            '<circle cx="60" cy="66" r="18" fill="#0F766E"/>' +
+            '<circle cx="132" cy="66" r="18" fill="#0F766E"/>' +
+            '<circle cx="96" cy="132" r="18" fill="#0F766E"/>' +
+            '<line x1="60" y1="66" x2="132" y2="66" stroke="#F59E0B" stroke-width="6" stroke-linecap="round"/>' +
+            '<line x1="132" y1="66" x2="96" y2="132" stroke="#F59E0B" stroke-width="6" stroke-linecap="round"/>' +
+            '<line x1="96" y1="132" x2="60" y2="66" stroke="#F59E0B" stroke-width="6" stroke-linecap="round"/>' +
+            '</svg>'
+          ),
+          sizes: '192x192',
+          type: 'image/svg+xml',
+          purpose: 'any'
+        }]
+      };
+      var blob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
+      var url = URL.createObjectURL(blob);
+      var link = document.getElementById('manifestLink');
+      if (link) link.href = url;
+    } catch (e) { /* ignore */ }
+
+    // Install prompt
+    window.addEventListener('beforeinstallprompt', function (e) {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      var banner = document.getElementById('installBanner');
+      if (banner) banner.classList.remove('hidden');
+      track('pwa_install_available');
+    });
+
+    var btnInstall = document.getElementById('btnInstall');
+    if (btnInstall) {
+      btnInstall.addEventListener('click', async function () {
+        if (!deferredInstallPrompt) return;
+        deferredInstallPrompt.prompt();
+        try {
+          var choice = await deferredInstallPrompt.userChoice;
+          track('pwa_install_result', { outcome: choice.outcome });
+        } catch (e) {}
+        deferredInstallPrompt = null;
+        var banner = document.getElementById('installBanner');
+        if (banner) banner.classList.add('hidden');
+      });
+    }
+    var btnDismiss = document.getElementById('btnInstallDismiss');
+    if (btnDismiss) {
+      btnDismiss.addEventListener('click', function () {
+        var banner = document.getElementById('installBanner');
+        if (banner) banner.classList.add('hidden');
+        track('pwa_install_dismissed');
+      });
+    }
+
+    // Detect standalone mode
+    var standalone = window.matchMedia('(display-mode: standalone)').matches ||
+                     window.navigator.standalone === true;
+    if (standalone) track('pwa_standalone');
+  }
+
+  /* ============================================================
+     BOOT
+     ============================================================ */
+  function boot() {
+    app.todayDate = dateKey();
+    UNLOCKS.forEach(function (u) {
+      if (app.store.currentLevel >= u.level && app.store.unlocks.indexOf(u.id) < 0) {
+        app.store.unlocks.push(u.id);
+      }
+    });
+    ensureMissionsToday();
+    saveStore();
+    setupPWA();
+    applyChapterTheme();
+    renderHome();
+    bind();
+    showScreen('home');
+    setInterval(tickCountdown, 1000);
+    checkAchievements({});
+    track('session_start', {
+      level: app.store.currentLevel,
+      totalSolved: app.store.totalSolved,
+      psr: Math.round(app.store.psr),
+      prestige: app.store.prestige
+    });
+  }
+
+  function safeBoot() {
+    try { boot(); }
+    catch (err) { console.error('BOOT FAILED', err); showBootError(err); }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', safeBoot);
+  } else {
+    safeBoot();
+  }
+})();
+</script>
+</body>
+</html>
